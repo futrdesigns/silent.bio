@@ -80,13 +80,19 @@ export function IdentityHeader({
   const getNameEffectClass = () => {
     switch (settings.fontEffect) {
       case 'glow':
-        return 'drop-shadow-[0_0_12px_var(--accent-glow)]';
+        return 'drop-shadow-[0_0_14px_var(--accent-glow)]';
       case 'shimmer':
-        return 'bg-gradient-to-r from-foreground via-accent to-foreground bg-clip-text text-transparent animate-pulse';
+        return 'effect-shimmer font-bold';
       case 'rainbow':
-        return 'bg-gradient-to-r from-red-400 via-emerald-400 to-indigo-400 bg-clip-text text-transparent';
+        return 'effect-rainbow font-bold';
       case 'glitch':
-        return 'animate-bounce font-mono tracking-widest';
+        return 'effect-glitch font-mono font-bold tracking-wider';
+      case 'neon_pulse':
+        return 'effect-neon font-bold';
+      case 'fire':
+        return 'effect-fire font-bold';
+      case 'metallic':
+        return 'effect-metallic font-bold';
       default:
         return '';
     }
@@ -183,8 +189,9 @@ export function IdentityHeader({
           <h1
             className={`text-2xl font-bold tracking-tight transition-all ${getNameEffectClass()}`}
             style={{
+              fontFamily: settings.fontFamily,
               color: settings.textColor || '#F5F5F5',
-              ['--accent-glow' as any]: settings.accentColor,
+              ['--accent-glow' as any]: settings.accentColor || '#A5A5FF',
             }}
           >
             {profile.displayName}

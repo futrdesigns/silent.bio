@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { computeAutoBadges, getProfileByUsername, ADMIN_USERNAMES } from '../../lib/db/profile-service';
+import {
+  computeAutoBadges,
+  getProfileByUsername,
+  recordVerifiedView,
+  getProfileViewCount,
+  ADMIN_USERNAMES,
+} from '../../lib/db/profile-service';
 import { useEditorStore } from '../../lib/store/editor-store';
 
 describe('Profile Service & Rules Verification', () => {
@@ -21,22 +27,36 @@ describe('Profile Service & Rules Verification', () => {
     expect(lateUserBadges.map((b) => b.id)).not.toContain('early_adopter');
   });
 
-  it('recognizes @s as admin and grants staff badge', () => {
+  it('recognizes @s as admin, grants staff badge, and has no fake inflated views', () => {
     expect(ADMIN_USERNAMES).toContain('s');
 
     const sBadges = computeAutoBadges('s', 1);
     expect(sBadges.map((b) => b.id)).toContain('staff');
     expect(sBadges.map((b) => b.id)).toContain('verified');
     expect(sBadges.map((b) => b.id)).toContain('early_adopter');
+
+    // Genuine non-inflated starting view count
+    const sViews = getProfileViewCount('s');
+    expect(sViews).toBeLessThanOrEqual(10);
   });
 
-  it('increments live view count on profile visits', async () => {
-    const res1 = await getProfileByUsername('testviewuser');
-    expect(res1).toBeDefined();
-    const count1 = res1!.viewCount;
+  it('records verified views and blocks bot view-botting', async () => {
+    const initialViews = getProfileViewCount('antiviewbotuser');
 
-    const res2 = await getProfileByUsername('testviewuser');
-    expect(res2!.viewCount).toBe(count1 + 1);
+    // 1. Valid unique human visitor increments count
+    const humanResult = await recordVerifiedView('antiviewbotuser', '198.51.100.1', 'Mozilla/5.0 Chrome/120.0');
+    expect(humanResult.recorded).toBe(true);
+    expect(humanResult.views).toBe(initialViews + 1);
+
+    // 2. Immediate repeat by same visitor is blocked by cooldown
+    const repeatResult = await recordVerifiedView('antiviewbotuser', '198.51.100.1', 'Mozilla/5.0 Chrome/120.0');
+    expect(repeatResult.recorded).toBe(false);
+    expect(repeatResult.views).toBe(initialViews + 1);
+
+    // 3. Automated bot is blocked and does not increment
+    const botResult = await recordVerifiedView('antiviewbotuser', '198.51.100.2', 'Googlebot/2.1 (+http://www.google.com/bot.html)');
+    expect(botResult.recorded).toBe(false);
+    expect(botResult.views).toBe(initialViews + 1);
   });
 
   it('initializes editor with chosen user instead of hardcoded creator', () => {

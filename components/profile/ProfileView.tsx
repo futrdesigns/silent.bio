@@ -23,8 +23,44 @@ interface ProfileViewProps {
 export function ProfileView({ payload, isPreview = false, initialViewCount = 1 }: ProfileViewProps) {
   const { profile, settings, links, components, music, badges, discordPresence, comments = [] } = payload;
   const [hasEntered, setHasEntered] = React.useState(!settings.enableSplashScreen || isPreview);
+  const [viewCount, setViewCount] = React.useState(initialViewCount);
   const [copiedLink, setCopiedLink] = React.useState(false);
   const [showQrModal, setShowQrModal] = React.useState(false);
+
+  // Anti-viewbotting verified view tracker
+  React.useEffect(() => {
+    if (isPreview) return;
+
+    const recordView = async () => {
+      try {
+        const localKey = `viewed_${profile.username}`;
+        const lastSeen = localStorage.getItem(localKey);
+        const now = Date.now();
+
+        // 15-minute client-side cooldown check
+        if (lastSeen && now - Number(lastSeen) < 15 * 60 * 1000) {
+          return;
+        }
+
+        const res = await fetch(`/api/profiles/${encodeURIComponent(profile.username)}/view`, {
+          method: 'POST',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.recorded && typeof data.viewCount === 'number') {
+            setViewCount(data.viewCount);
+          }
+          localStorage.setItem(localKey, String(now));
+        }
+      } catch {
+        // Safe offline / mock fallback
+      }
+    };
+
+    // If splash screen is active, wait until entered or record after 2s dwell
+    const timer = setTimeout(recordView, 2000);
+    return () => clearTimeout(timer);
+  }, [profile.username, isPreview]);
 
   // Compute safe scoped custom CSS
   const safeCss = React.useMemo(() => {
@@ -122,17 +158,19 @@ export function ProfileView({ payload, isPreview = false, initialViewCount = 1 }
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface/85 border border-white/10 text-xs font-mono text-muted backdrop-blur-xl shadow-lg transition-transform hover:scale-105 select-none">
             <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
             <Eye className="h-3.5 w-3.5 text-accent" />
-            <span className="text-foreground font-semibold">{initialViewCount.toLocaleString()}</span>
+            <span className="text-foreground font-semibold">{viewCount.toLocaleString()}</span>
             <span>views</span>
           </div>
         </div>
       )}
 
-      {/* Custom Mouse Cursor */}
+      {/* Custom Mouse Cursor with Trails and Click Bursts */}
       <CustomCursor
         effect={settings.cursorEffect}
         accentColor={settings.accentColor}
         customCursorUrl={settings.cursorCustomUrl}
+        cursorTrail={settings.cursorTrail}
+        clickEffect={settings.clickEffect}
       />
 
       {/* Dynamic Background */}
@@ -153,24 +191,62 @@ export function ProfileView({ payload, isPreview = false, initialViewCount = 1 }
       {/* Custom CSS Style Injection (Scoped & Sanitized) */}
       {safeCss && <style dangerouslySetInnerHTML={{ __html: safeCss }} />}
 
-      {/* Optional Click-to-Enter Splash Screen */}
+      {/* guns.lol style Click-to-Enter Splash Screen with Audio Un-mute */}
       {!hasEntered && (
         <div
           onClick={() => setHasEntered(true)}
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/90 backdrop-blur-xl cursor-pointer select-none transition-opacity duration-300"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/95 backdrop-blur-2xl cursor-pointer select-none transition-all duration-500 animate-in fade-in"
         >
-          <div className="space-y-4 text-center px-4">
-            <span className="font-mono text-xs tracking-widest text-accent uppercase">
-              SILENT.BIO
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-              {profile.displayName}
-            </h2>
-            <p className="text-xs font-mono text-muted animate-pulse">
-              [ {settings.splashText || 'CLICK TO ENTER'} ]
-            </p>
+          <div className="space-y-6 text-center px-6 max-w-sm flex flex-col items-center">
+            {/* Avatar Preview */}
+            <div className="relative group">
+              <div
+                className="h-24 w-24 rounded-full overflow-hidden border-2 bg-surface shadow-2xl flex items-center justify-center transition-transform group-hover:scale-105"
+                style={{
+                  borderColor: settings.accentColor || '#A5A5FF',
+                  boxShadow: `0 0 30px ${settings.accentColor}40`,
+                }}
+              >
+                {profile.avatarUrl ? (
+                  <img
+                    src={profile.avatarUrl}
+                    alt={profile.displayName}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span
+                    className="font-bold text-3xl"
+                    style={{ color: settings.accentColor || '#A5A5FF' }}
+                  >
+                    {profile.displayName.slice(0, 1).toUpperCase()}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+                {profile.displayName}
+              </h2>
+              <span className="font-mono text-xs text-muted block">@{profile.username}</span>
+            </div>
+
+            {/* Click prompt with pulsating glow */}
+            <div
+              className="px-5 py-2.5 rounded-full border bg-white/5 backdrop-blur-md transition-all hover:scale-105"
+              style={{ borderColor: `${settings.accentColor}50` }}
+            >
+              <p
+                className="text-xs font-mono font-medium tracking-wide uppercase flex items-center gap-2"
+                style={{ color: settings.accentColor || '#A5A5FF' }}
+              >
+                <span>🔊</span>
+                <span>[ {settings.splashText || 'CLICK ANYWHERE TO ENTER'} ]</span>
+              </p>
+            </div>
+
             {settings.splashSubtext && (
-              <p className="text-[11px] text-muted max-w-xs mx-auto">
+              <p className="text-[11px] text-muted leading-relaxed font-mono">
                 {settings.splashSubtext}
               </p>
             )}

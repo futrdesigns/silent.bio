@@ -36,7 +36,8 @@ export function EditorNavigation() {
     { id: 'themes', label: 'Themes', icon: Sparkles },
     { id: 'links', label: 'Links', icon: LinkIcon },
     { id: 'music', label: 'Music Player', icon: Music },
-    { id: 'effects', label: 'Effects', icon: Sparkles },
+    { id: 'intro', label: 'Intro Screen (guns.lol)', icon: Sparkles },
+    { id: 'effects', label: 'Effects & Cursors', icon: Sparkles },
     { id: 'custom-css', label: 'Custom CSS', icon: Code },
   ];
 
@@ -390,18 +391,80 @@ export function EditorInspector() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-mono text-muted">NAME EFFECT</label>
+            <label className="text-xs font-mono text-muted">TYPOGRAPHY / FONT FAMILY</label>
+            <select
+              className="w-full h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+              value={payload.settings.fontFamily}
+              onChange={(e) => updateSettings({ fontFamily: e.target.value })}
+            >
+              <option value="var(--font-geist-sans), sans-serif">Geist Sans (Clean Modern)</option>
+              <option value="var(--font-geist-mono), monospace">Geist Mono (Terminal / Cyber)</option>
+              <option value="'Inter', sans-serif">Inter (Neo-Digital)</option>
+              <option value="'Outfit', sans-serif">Outfit (Geometric Minimal)</option>
+              <option value="'Space Grotesk', sans-serif">Space Grotesk (Tech Brutalist)</option>
+              <option value="'Playfair Display', serif">Playfair Display (Editorial Serif)</option>
+              <option value="'Cinzel', serif">Cinzel (Gothic / Dark Fantasy)</option>
+              <option value="'Cormorant Garamond', serif">Cormorant Garamond (Dark Romance / Taboo)</option>
+              <option value="'Press Start 2P', monospace">Press Start 2P (8-Bit Retro Arcade)</option>
+              <option value="'VT323', monospace">VT323 (Retro CRT Terminal)</option>
+              <option value="'Syne', sans-serif">Syne (Futuristic Avant-Garde)</option>
+              <option value="'Righteous', cursive">Righteous (Synthwave / Cyber)</option>
+              <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans (Sleek Tech)</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">NAME TEXT EFFECT</label>
             <select
               className="w-full h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
               value={payload.settings.fontEffect}
               onChange={(e) => updateSettings({ fontEffect: e.target.value as any })}
             >
-              <option value="none">Standard Crisp</option>
-              <option value="glow">Neon Glow</option>
-              <option value="shimmer">Silver Shimmer Pulse</option>
-              <option value="rainbow">Chromatic RGB Gradient</option>
-              <option value="glitch">Glitch Mono</option>
+              <option value="none">Standard Crisp Flat</option>
+              <option value="glow">Neon Glow Drop Shadow</option>
+              <option value="shimmer">Silver Shimmer Sweep</option>
+              <option value="rainbow">Chromatic Rainbow Gradient</option>
+              <option value="glitch">Glitch Chromatic Aberration</option>
+              <option value="neon_pulse">Neon Tube Flickering Pulse</option>
+              <option value="fire">Blazing Fire Gradient</option>
+              <option value="metallic">Liquid Chrome Sheen</option>
             </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-mono text-muted">TEXT COLOR</label>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="color"
+                  className="h-8 w-8 rounded cursor-pointer border border-border bg-transparent shrink-0"
+                  value={payload.settings.textColor || '#F5F5F5'}
+                  onChange={(e) => updateSettings({ textColor: e.target.value })}
+                />
+                <Input
+                  className="font-mono text-[11px] h-8"
+                  value={payload.settings.textColor || '#F5F5F5'}
+                  onChange={(e) => updateSettings({ textColor: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-mono text-muted">BIO COLOR</label>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="color"
+                  className="h-8 w-8 rounded cursor-pointer border border-border bg-transparent shrink-0"
+                  value={payload.settings.bioTextColor || '#92949D'}
+                  onChange={(e) => updateSettings({ bioTextColor: e.target.value })}
+                />
+                <Input
+                  className="font-mono text-[11px] h-8"
+                  value={payload.settings.bioTextColor || '#92949D'}
+                  onChange={(e) => updateSettings({ bioTextColor: e.target.value })}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="space-y-1.5">
@@ -618,12 +681,55 @@ export function EditorInspector() {
         </div>
       )}
 
+      {activeSection === 'intro' && (
+        <div className="space-y-4">
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider font-mono">
+            guns.lol Intro Splash Screen
+          </h2>
+          <p className="text-[11px] text-muted leading-relaxed">
+            Require visitors to click anywhere to enter your profile. Unlocks audio autoplay, triggers entrance sound, and immerses the viewer.
+          </p>
+
+          <div className="flex items-center justify-between p-3 rounded-md border border-border bg-surface">
+            <div>
+              <div className="text-xs font-semibold">Enable Intro Screen</div>
+              <div className="text-[10px] text-muted">Full-screen gate with click to enter</div>
+            </div>
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-border accent-accent cursor-pointer"
+              checked={payload.settings.enableSplashScreen}
+              onChange={(e) => updateSettings({ enableSplashScreen: e.target.checked })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">SPLASH PROMPT BUTTON</label>
+            <Input
+              placeholder="CLICK ANYWHERE TO ENTER"
+              value={payload.settings.splashText || ''}
+              onChange={(e) => updateSettings({ splashText: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">SUBTEXT / SOUND HINT</label>
+            <Input
+              placeholder="e.g. turn up sound for full immersion 🔊"
+              value={payload.settings.splashSubtext || ''}
+              onChange={(e) => updateSettings({ splashSubtext: e.target.value })}
+            />
+          </div>
+        </div>
+      )}
+
       {activeSection === 'effects' && (
         <div className="space-y-4">
           <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider font-mono">
-            Ambient &amp; Cursor Effects
+            Ambient, Cursor &amp; Click Effects
           </h2>
 
+          {/* Mouse Cursor Selector */}
           <div className="space-y-1.5">
             <label className="text-xs font-mono text-muted">CUSTOM MOUSE CURSOR</label>
             <select
@@ -631,11 +737,80 @@ export function EditorInspector() {
               value={payload.settings.cursorEffect}
               onChange={(e) => updateSettings({ cursorEffect: e.target.value as any })}
             >
-              <option value="none">Default Pointer</option>
+              <option value="none">Default OS Pointer</option>
               <option value="ring">Aesthetic Ring Indicator</option>
               <option value="glow">Neon Glow Orb</option>
-              <option value="trail">Shooting Star Particles Trail</option>
-              <option value="crosshair">Sniper Crosshair</option>
+              <option value="crosshair">Sniper Tactical Crosshair</option>
+              <option value="dot">Minimalist Dot</option>
+              <option value="sword">Glowing Katana / Cyber Blade</option>
+              <option value="heart">Pixel Heart</option>
+              <option value="star">Magic Star</option>
+              <option value="wand">Spell Wand</option>
+              <option value="custom">Custom Image / Uploaded Cursor</option>
+            </select>
+          </div>
+
+          {/* Custom Cursor URL or Direct File Upload */}
+          <div className="space-y-1.5 p-2.5 rounded-md border border-white/10 bg-white/5">
+            <label className="text-[11px] font-mono text-muted block">UPLOAD OR ENTER CURSOR IMAGE</label>
+            <Input
+              placeholder="https://.../cursor.png"
+              value={payload.settings.cursorCustomUrl || ''}
+              onChange={(e) => updateSettings({ cursorCustomUrl: e.target.value, cursorEffect: 'custom' })}
+              className="text-xs h-8"
+            />
+            <label className="block w-full text-center py-1.5 px-3 rounded border border-white/10 bg-surface hover:border-accent text-[11px] font-mono cursor-pointer transition-colors">
+              <span>Choose Image File (PNG, SVG, CUR)</span>
+              <input
+                type="file"
+                accept="image/*,.cur"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      if (typeof reader.result === 'string') {
+                        updateSettings({ cursorCustomUrl: reader.result, cursorEffect: 'custom' });
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+            </label>
+          </div>
+
+          {/* Cursor Trails */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">CURSOR TRAILS</label>
+            <select
+              className="w-full h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+              value={payload.settings.cursorTrail || 'none'}
+              onChange={(e) => updateSettings({ cursorTrail: e.target.value as any })}
+            >
+              <option value="none">No Trail</option>
+              <option value="particles">Neon Floating Particles</option>
+              <option value="sparkles">Twinkling Star Sparkles</option>
+              <option value="hearts">Floating Soft Hearts</option>
+              <option value="fire">Fire Ember Sparks</option>
+            </select>
+          </div>
+
+          {/* Click Burst Effect */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">CLICK BURST EFFECT</label>
+            <select
+              className="w-full h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+              value={payload.settings.clickEffect || 'ripple'}
+              onChange={(e) => updateSettings({ clickEffect: e.target.value as any })}
+            >
+              <option value="none">None</option>
+              <option value="ripple">Shockwave Ripple Ring</option>
+              <option value="shockwave">Intense Neon Pulse</option>
+              <option value="spark_burst">Radial Sparks Explosion</option>
+              <option value="heart_explode">Mini Hearts Burst</option>
+              <option value="cherry_blossom">Sakura Petals Splash</option>
             </select>
           </div>
 
@@ -659,20 +834,39 @@ export function EditorInspector() {
             />
           </div>
 
+          {/* Ambient Weather / Particles */}
           <div className="space-y-1.5 pt-2">
-            <label className="text-xs font-mono text-muted">BACKGROUND PARTICLES / WEATHER</label>
-            <div className="space-y-1.5">
-              {(['none', 'stars', 'snow', 'rain', 'embers', 'particles', 'matrix', 'crt_lines'] as const).map((eff) => (
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-mono text-muted">BACKGROUND PARTICLES &amp; WEATHER</label>
+              <span className="text-[10px] text-accent font-mono capitalize">
+                {payload.settings.activeEffect}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {[
+                { id: 'none', label: 'None' },
+                { id: 'stars', label: '✦ Stars' },
+                { id: 'snow', label: '❄ Snow' },
+                { id: 'rain', label: '🌧 Rain' },
+                { id: 'embers', label: '🔥 Embers' },
+                { id: 'cherry_blossoms', label: '🌸 Cherry Blossoms' },
+                { id: 'fireflies', label: '✨ Fireflies' },
+                { id: 'fog', label: '🌫 Fog / Haze' },
+                { id: 'bubbles', label: '🫧 Bubbles' },
+                { id: 'lightning', label: '⚡ Lightning Storm' },
+                { id: 'matrix', label: '💚 Matrix Code' },
+                { id: 'crt_lines', label: '📺 CRT Scanlines' },
+              ].map((eff) => (
                 <button
-                  key={eff}
-                  onClick={() => updateSettings({ activeEffect: eff })}
-                  className={`w-full text-left px-3 py-1.5 rounded text-xs border capitalize transition-colors ${
-                    payload.settings.activeEffect === eff
-                      ? 'border-accent bg-accent/10 text-foreground font-semibold'
-                      : 'border-border bg-elevated/40 text-muted hover:border-border-strong'
+                  key={eff.id}
+                  onClick={() => updateSettings({ activeEffect: eff.id as any })}
+                  className={`text-left px-2.5 py-1.5 rounded text-[11px] font-mono border transition-all ${
+                    payload.settings.activeEffect === eff.id
+                      ? 'border-accent bg-accent/15 text-foreground font-semibold shadow-sm'
+                      : 'border-border bg-elevated/40 text-muted hover:border-border-strong hover:text-foreground'
                   }`}
                 >
-                  {eff.replace('_', ' ')}
+                  {eff.label}
                 </button>
               ))}
             </div>

@@ -2,6 +2,7 @@ import { FullProfilePayload, BadgeRecord, ProfileRecord, ProfileSettingsRecord, 
 import { BUILTIN_THEMES } from '@/lib/themes/presets';
 import { SYSTEM_BADGES } from '@/lib/db/seed/seed-data';
 import { supabase } from '@/lib/db/client';
+import { shouldCountView } from '@/lib/security/anti-viewbot';
 
 /**
  * Global known admins list
@@ -143,7 +144,7 @@ function initSeed() {
     music: [],
     badges: sBadges,
   });
-  VIEW_COUNTS.set('s', 1337);
+  VIEW_COUNTS.set('s', 1);
 }
 
 initSeed();
@@ -221,8 +222,7 @@ export async function getProfileByUsername(username: string): Promise<{ payload:
         badges,
       };
 
-      const views = (VIEW_COUNTS.get(clean) || 0) + 1;
-      VIEW_COUNTS.set(clean, views);
+      const views = VIEW_COUNTS.get(clean) ?? 0;
 
       return { payload, viewCount: views };
     }
@@ -234,8 +234,7 @@ export async function getProfileByUsername(username: string): Promise<{ payload:
   // Check memory store
   const existing = MEMORY_PROFILES.get(clean);
   if (existing) {
-    const views = (VIEW_COUNTS.get(clean) || 0) + 1;
-    VIEW_COUNTS.set(clean, views);
+    const views = VIEW_COUNTS.get(clean) ?? 0;
     return { payload: existing, viewCount: views };
   }
 
@@ -354,10 +353,40 @@ export async function getProfileByUsername(username: string): Promise<{ payload:
   };
 
   MEMORY_PROFILES.set(clean, newPayload);
-  const views = (VIEW_COUNTS.get(clean) || 0) + 1;
-  VIEW_COUNTS.set(clean, views);
+  const views = VIEW_COUNTS.get(clean) ?? 0;
 
   return { payload: newPayload, viewCount: views };
+}
+
+/**
+ * Record a verified view using anti-bot & cooldown deduplication
+ */
+export async function recordVerifiedView(
+  username: string,
+  ip: string = '127.0.0.1',
+  userAgent: string = 'browser'
+): Promise<{ recorded: boolean; views: number }> {
+  initSeed();
+  const clean = username.toLowerCase().trim();
+  const current = VIEW_COUNTS.get(clean) ?? 0;
+
+  const valid = shouldCountView(clean, ip, userAgent);
+  if (!valid) {
+    return { recorded: false, views: current };
+  }
+
+  const updated = current + 1;
+  VIEW_COUNTS.set(clean, updated);
+  return { recorded: true, views: updated };
+}
+
+/**
+ * Get current real view count for a profile
+ */
+export function getProfileViewCount(username: string): number {
+  initSeed();
+  const clean = username.toLowerCase().trim();
+  return VIEW_COUNTS.get(clean) ?? 0;
 }
 
 /**

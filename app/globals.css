@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700&family=Outfit:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;600;700&family=Press+Start+2P&family=Righteous&family=Space+Grotesk:wght@400;600;700&family=Syne:wght@500;700;800&family=VT323&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,6 +12,75 @@
   --hover: #1B1E23;
   --accent: #A5A5FF;
   --border: rgba(255, 255, 255, 0.08);
+}
+
+@keyframes rainbow-flow {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+@keyframes shimmer-sweep {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes glitch-anim {
+  0% { transform: translate(0); text-shadow: -2px 0 #ff0055, 2px 0 #00ffff; }
+  25% { transform: translate(-1px, 1px); text-shadow: 2px 0 #ff0055, -2px 0 #00ffff; }
+  50% { transform: translate(1px, -1px); text-shadow: -2px 0 #00ffff, 2px 0 #ff0055; }
+  75% { transform: translate(-1px, -1px); text-shadow: 2px 0 #00ffff, -2px 0 #ff0055; }
+  100% { transform: translate(0); text-shadow: -2px 0 #ff0055, 2px 0 #00ffff; }
+}
+
+@keyframes neon-flicker {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px var(--accent-glow)) drop-shadow(0 0 20px var(--accent-glow)); }
+  50% { opacity: 0.85; filter: drop-shadow(0 0 4px var(--accent-glow)); }
+}
+
+@keyframes fire-glow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.effect-rainbow {
+  background: linear-gradient(90deg, #ff0055, #ff9900, #ffee00, #00ff66, #00ffff, #7700ff, #ff0055);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-sweep 4s linear infinite;
+}
+
+.effect-shimmer {
+  background: linear-gradient(90deg, currentColor 0%, var(--accent) 50%, currentColor 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-sweep 2.5s ease-in-out infinite;
+}
+
+.effect-glitch {
+  display: inline-block;
+  animation: glitch-anim 2s infinite ease-in-out;
+}
+
+.effect-neon {
+  animation: neon-flicker 1.8s infinite ease-in-out;
+}
+
+.effect-fire {
+  background: linear-gradient(135deg, #ff4500, #ff8c00, #ffd700, #ff0055);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: fire-glow 3s ease infinite;
+}
+
+.effect-metallic {
+  background: linear-gradient(180deg, #ffffff 0%, #a0a0a5 50%, #e0e0e5 51%, #ffffff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
 }
 
 * {

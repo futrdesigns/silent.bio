@@ -95,6 +95,8 @@ const defaultInitialPayload: FullProfilePayload = {
     activeEffect: 'stars',
     effectIntensity: 0.5,
     cursorEffect: 'ring',
+    cursorTrail: 'none',
+    clickEffect: 'ripple',
     cursorCustomUrl: '',
     tiltEffect: true,
     typewriterBio: false,

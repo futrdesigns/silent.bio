@@ -8,11 +8,15 @@ export type CardStyle = 'glassmorphism' | 'pure-flat' | 'subtle-border' | 'neo-b
 
 export type BgType = 'solid' | 'gradient' | 'image' | 'video' | 'mesh' | 'noise';
 
-export type FontEffect = 'none' | 'glow' | 'shimmer' | 'gradient' | 'typewriter' | 'rainbow' | 'glitch';
+export type FontEffect = 'none' | 'glow' | 'shimmer' | 'gradient' | 'typewriter' | 'rainbow' | 'glitch' | 'neon_pulse' | 'fire' | 'metallic';
 
-export type ActiveEffect = 'none' | 'snow' | 'stars' | 'rain' | 'embers' | 'particles' | 'crt_lines' | 'matrix';
+export type ActiveEffect = 'none' | 'snow' | 'stars' | 'rain' | 'embers' | 'particles' | 'crt_lines' | 'matrix' | 'cherry_blossoms' | 'fireflies' | 'fog' | 'bubbles' | 'lightning';
 
-export type CursorEffect = 'none' | 'trail' | 'glow' | 'ring' | 'crosshair' | 'dot';
+export type CursorEffect = 'none' | 'ring' | 'glow' | 'crosshair' | 'dot' | 'heart' | 'sword' | 'star' | 'wand' | 'custom';
+
+export type CursorTrailType = 'none' | 'particles' | 'sparkles' | 'hearts' | 'neon_line' | 'fire';
+
+export type ClickEffectType = 'none' | 'ripple' | 'spark_burst' | 'heart_explode' | 'shockwave' | 'cherry_blossom';
 
 export type AvatarDecoration = 'none' | 'glow_ring' | 'neon_pulse' | 'cyber_bracket' | 'fire_ring' | 'crown_gold' | 'thorn_wreath';
 
@@ -90,7 +94,10 @@ export interface ProfileSettingsRecord {
   activeEffect: ActiveEffect;
   effectIntensity: number;
   cursorEffect: CursorEffect;
+  cursorTrail?: CursorTrailType;
+  clickEffect?: ClickEffectType;
   cursorCustomUrl?: string;
+  cursorPreset?: string;
   tiltEffect: boolean;
   typewriterBio: boolean;
   crtScanlines: boolean;
