@@ -1,4 +1,4 @@
-// File: C:\Users\dsign\.gemini\antigravity\scratch\silent-bio\app\[username]\page.tsx
+// File: C:\Users\dsign\Documents\GitHub\silent.bio\app\[username]\page.tsx
 import * as entry from '../../../../app/[username]/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

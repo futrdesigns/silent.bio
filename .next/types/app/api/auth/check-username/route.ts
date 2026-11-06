@@ -1,4 +1,4 @@
-// File: C:\Users\dsign\.gemini\antigravity\scratch\silent-bio\app\api\auth\check-username\route.ts
+// File: C:\Users\dsign\Documents\GitHub\silent.bio\app\api\auth\check-username\route.ts
 import * as entry from '../../../../../../app/api/auth/check-username/route.js'
 import type { NextRequest } from 'next/server.js'
 

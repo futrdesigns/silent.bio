@@ -1,4 +1,4 @@
-// File: C:\Users\dsign\.gemini\antigravity\scratch\silent-bio\app\layout.tsx
+// File: C:\Users\dsign\Documents\GitHub\silent.bio\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

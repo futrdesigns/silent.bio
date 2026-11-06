@@ -1,4 +1,4 @@
-// File: C:\Users\dsign\.gemini\antigravity\scratch\silent-bio\app\api\analytics\collect\route.ts
+// File: C:\Users\dsign\Documents\GitHub\silent.bio\app\api\analytics\collect\route.ts
 import * as entry from '../../../../../../app/api/analytics/collect/route.js'
 import type { NextRequest } from 'next/server.js'
 
