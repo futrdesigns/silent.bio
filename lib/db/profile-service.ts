@@ -87,6 +87,8 @@ function initSeed() {
       profileId: 'usr_admin_s',
       themeId: 'midnight',
       layoutPreset: 'centered',
+      profileAlignment: 'center',
+      cardStyle: 'glassmorphism',
       bgType: defaultTheme.bgType,
       bgValue: defaultTheme.bgValue,
       bgBlur: 0,
@@ -270,6 +272,8 @@ export async function getProfileByUsername(username: string): Promise<{ payload:
       profileId: `usr_${clean}`,
       themeId: 'midnight',
       layoutPreset: 'centered',
+      profileAlignment: 'center',
+      cardStyle: 'glassmorphism',
       bgType: defaultTheme.bgType,
       bgValue: defaultTheme.bgValue,
       bgBlur: 0,
@@ -321,8 +325,32 @@ export async function getProfileByUsername(username: string): Promise<{ payload:
       },
     ],
     components: [],
-    music: [],
+    music: [
+      {
+        id: `mus_${clean}`,
+        profileId: `usr_${clean}`,
+        sourceType: 'upload',
+        trackTitle: 'Midnight Ambient Drift',
+        artistName: 'Solaris',
+        sourceUrl: 'https://assets.silent.bio/audio/demo.mp3',
+        artworkUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80',
+        audioDuration: 180,
+        orderIndex: 0,
+        isAutoplay: false,
+      },
+    ],
     badges,
+    comments: [
+      {
+        id: `cmt_${clean}_1`,
+        profileId: `usr_${clean}`,
+        authorUsername: 's',
+        authorDisplayName: 's',
+        authorIsVerified: true,
+        content: 'Welcome to SILENT.BIO. Keep your space clean.',
+        createdAt: '1d ago',
+      },
+    ],
   };
 
   MEMORY_PROFILES.set(clean, newPayload);

@@ -17,6 +17,41 @@ describe('Advanced Customization System (guns.lol, alias.rip, fakecrime.bio stan
     expect(updated.cardShadowGlow).toBe('neon');
   });
 
+  it('updates card style (glassmorphism, neo-brutalist, cyber-grid)', () => {
+    const store = useEditorStore.getState();
+
+    store.updateSettings({ cardStyle: 'glassmorphism' });
+    expect(useEditorStore.getState().payload.settings.cardStyle).toBe('glassmorphism');
+
+    store.updateSettings({ cardStyle: 'neo-brutalist' });
+    expect(useEditorStore.getState().payload.settings.cardStyle).toBe('neo-brutalist');
+  });
+
+  it('updates profile text and pfp alignment (center, left, right)', () => {
+    const store = useEditorStore.getState();
+
+    store.updateSettings({ profileAlignment: 'left' });
+    expect(useEditorStore.getState().payload.settings.profileAlignment).toBe('left');
+
+    store.updateSettings({ profileAlignment: 'right' });
+    expect(useEditorStore.getState().payload.settings.profileAlignment).toBe('right');
+  });
+
+  it('updates music player cover art and track details', () => {
+    const store = useEditorStore.getState();
+
+    store.updateMusic({
+      trackTitle: 'Neon Overdrive',
+      artistName: 'Kavinsky',
+      artworkUrl: 'https://example.com/cover.jpg',
+    });
+
+    const music = useEditorStore.getState().payload.music[0];
+    expect(music.trackTitle).toBe('Neon Overdrive');
+    expect(music.artistName).toBe('Kavinsky');
+    expect(music.artworkUrl).toBe('https://example.com/cover.jpg');
+  });
+
   it('toggles 3D card tilt and CRT scanlines', () => {
     const store = useEditorStore.getState();
 

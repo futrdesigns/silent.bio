@@ -2,6 +2,10 @@ export type PresenceStatus = 'online' | 'idle' | 'dnd' | 'offline';
 
 export type LayoutPreset = 'centered' | 'split' | 'left-aligned' | 'bento' | 'minimal-list' | 'full-bleed' | 'wide-card';
 
+export type ProfileAlignment = 'center' | 'left' | 'right';
+
+export type CardStyle = 'glassmorphism' | 'pure-flat' | 'subtle-border' | 'neo-brutalist' | 'cyber-grid' | 'elevated-dark';
+
 export type BgType = 'solid' | 'gradient' | 'image' | 'video' | 'mesh' | 'noise';
 
 export type FontEffect = 'none' | 'glow' | 'shimmer' | 'gradient' | 'typewriter' | 'rainbow' | 'glitch';
@@ -34,6 +38,7 @@ export interface ProfileRecord {
   isBanned: boolean;
   hideFromExplore: boolean;
   hideViewCounter: boolean;
+  likesCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -58,6 +63,8 @@ export interface ProfileSettingsRecord {
   profileId: string;
   themeId: string;
   layoutPreset: LayoutPreset;
+  profileAlignment: ProfileAlignment;
+  cardStyle: CardStyle;
   bgType: BgType;
   bgValue: string;
   bgBlur: number;
@@ -72,6 +79,9 @@ export interface ProfileSettingsRecord {
   avatarShape: 'circle' | 'square' | 'squircle' | 'hexagon';
   avatarDecoration: AvatarDecoration;
   avatarGlowColor: string;
+  isAnimatedAvatar?: boolean;
+  isAnimatedBanner?: boolean;
+  bannerHeight?: number;
   fontFamily: string;
   fontEffect: FontEffect;
   accentColor: string;
@@ -149,6 +159,17 @@ export interface BadgeRecord {
   color?: string;
 }
 
+export interface ProfileCommentRecord {
+  id: string;
+  profileId: string;
+  authorUsername: string;
+  authorDisplayName: string;
+  authorAvatarUrl?: string | null;
+  authorIsVerified?: boolean;
+  content: string;
+  createdAt: string;
+}
+
 export interface FullProfilePayload {
   profile: ProfileRecord;
   settings: ProfileSettingsRecord;
@@ -156,5 +177,6 @@ export interface FullProfilePayload {
   components: ProfileComponentRecord[];
   music: ProfileMusicRecord[];
   badges: BadgeRecord[];
+  comments?: ProfileCommentRecord[];
   discordPresence?: DiscordPresenceData;
 }

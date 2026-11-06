@@ -5,6 +5,7 @@ import {
   ProfileSettingsRecord,
   SocialLinkRecord,
   ProfileComponentRecord,
+  ProfileMusicRecord,
 } from '@/lib/types/profile';
 import { BUILTIN_THEMES } from '@/lib/themes/presets';
 import { SYSTEM_BADGES } from '@/lib/db/seed/seed-data';
@@ -34,6 +35,7 @@ interface EditorState {
   updateLink: (id: string, partial: Partial<SocialLinkRecord>) => void;
   removeLink: (id: string) => void;
   reorderLinks: (links: SocialLinkRecord[]) => void;
+  updateMusic: (partial: Partial<ProfileMusicRecord>) => void;
   toggleBadge: (badge: typeof SYSTEM_BADGES[number]) => void;
   undo: () => void;
   redo: () => void;
@@ -69,6 +71,8 @@ const defaultInitialPayload: FullProfilePayload = {
     profileId: 'usr_me',
     themeId: 'midnight',
     layoutPreset: 'centered',
+    profileAlignment: 'center',
+    cardStyle: 'glassmorphism',
     bgType: initialMidnight.bgType,
     bgValue: initialMidnight.bgValue,
     bgBlur: 0,
@@ -122,7 +126,20 @@ const defaultInitialPayload: FullProfilePayload = {
     },
   ],
   components: [],
-  music: [],
+  music: [
+    {
+      id: 'mus_1',
+      profileId: 'usr_me',
+      sourceType: 'upload',
+      trackTitle: 'Midnight Ambient Drift',
+      artistName: 'Solaris',
+      sourceUrl: 'https://assets.silent.bio/audio/demo.mp3',
+      artworkUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80',
+      audioDuration: 180,
+      orderIndex: 0,
+      isAutoplay: false,
+    },
+  ],
   badges: SYSTEM_BADGES.slice(0, 6),
 };
 
@@ -297,6 +314,35 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       payload: {
         ...payload,
         links,
+      },
+      autosaveStatus: 'dirty',
+      isDraft: true,
+    });
+  },
+
+  updateMusic: (partial) => {
+    const { payload, history } = get();
+    const existing = payload.music[0] || {
+      id: 'mus_1',
+      profileId: payload.profile.id,
+      sourceType: 'upload',
+      trackTitle: 'Midnight Ambient',
+      artistName: 'Solaris',
+      sourceUrl: 'https://assets.silent.bio/audio/demo.mp3',
+      artworkUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80',
+      audioDuration: 180,
+      orderIndex: 0,
+      isAutoplay: false,
+    };
+
+    set({
+      history: {
+        past: [...history.past, payload],
+        future: [],
+      },
+      payload: {
+        ...payload,
+        music: [{ ...existing, ...partial }],
       },
       autosaveStatus: 'dirty',
       isDraft: true,

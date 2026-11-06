@@ -35,6 +35,7 @@ export function EditorNavigation() {
     { id: 'appearance', label: 'Appearance', icon: Palette },
     { id: 'themes', label: 'Themes', icon: Sparkles },
     { id: 'links', label: 'Links', icon: LinkIcon },
+    { id: 'music', label: 'Music Player', icon: Music },
     { id: 'effects', label: 'Effects', icon: Sparkles },
     { id: 'custom-css', label: 'Custom CSS', icon: Code },
   ];
@@ -106,6 +107,7 @@ export function EditorInspector() {
     activeSection,
     updateProfile,
     updateSettings,
+    updateMusic,
     applyTheme,
     addLink,
     removeLink,
@@ -113,6 +115,13 @@ export function EditorInspector() {
   } = useEditorStore();
   const [newLinkTitle, setNewLinkTitle] = React.useState('');
   const [newLinkUrl, setNewLinkUrl] = React.useState('');
+
+  const activeTrack = payload.music[0] || {
+    trackTitle: 'Midnight Ambient Drift',
+    artistName: 'Solaris',
+    sourceUrl: 'https://assets.silent.bio/audio/demo.mp3',
+    artworkUrl: '',
+  };
 
   const handleAddLink = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,12 +140,25 @@ export function EditorInspector() {
     setNewLinkUrl('');
   };
 
+  const handleAddPreset = (platform: string, title: string, placeholderUrl: string) => {
+    addLink({
+      platform,
+      url: placeholderUrl,
+      title,
+      description: '',
+      displayStyle: 'card',
+      groupName: '',
+      isActive: true,
+      isCopyAction: false,
+    });
+  };
+
   return (
     <section className="w-80 border-l border-border bg-surface p-4 overflow-y-auto space-y-6">
       {activeSection === 'general' && (
         <div className="space-y-4">
           <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider font-mono">
-            Identity & Bio
+            Identity &amp; Bio
           </h2>
           <div className="space-y-1.5">
             <label className="text-xs font-mono text-muted">DISPLAY NAME</label>
@@ -145,6 +167,38 @@ export function EditorInspector() {
               onChange={(e) => updateProfile({ displayName: e.target.value })}
             />
           </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">PROFILE ALIGNMENT</label>
+            <select
+              className="w-full h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+              value={payload.settings.profileAlignment || 'center'}
+              onChange={(e) => updateSettings({ profileAlignment: e.target.value as any })}
+            >
+              <option value="center">Centered (Default)</option>
+              <option value="left">Left Aligned</option>
+              <option value="right">Right Aligned</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">AVATAR URL (IMAGE OR ANIMATED GIF)</label>
+            <Input
+              placeholder="https://.../avatar.gif"
+              value={payload.profile.avatarUrl || ''}
+              onChange={(e) => updateProfile({ avatarUrl: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">BANNER URL (IMAGE, GIF, OR MP4)</label>
+            <Input
+              placeholder="https://.../banner.jpg"
+              value={payload.profile.bannerUrl || ''}
+              onChange={(e) => updateProfile({ bannerUrl: e.target.value })}
+            />
+          </div>
+
           <div className="space-y-1.5">
             <label className="text-xs font-mono text-muted">BIO</label>
             <textarea
@@ -257,6 +311,23 @@ export function EditorInspector() {
           <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider font-mono">
             Appearance &amp; Glow
           </h2>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">CARD ARCHITECTURE STYLE</label>
+            <select
+              className="w-full h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent font-mono"
+              value={payload.settings.cardStyle || 'glassmorphism'}
+              onChange={(e) => updateSettings({ cardStyle: e.target.value as any })}
+            >
+              <option value="glassmorphism">Glassmorphism (Frosted Glass &amp; Halo)</option>
+              <option value="elevated-dark">Elevated Obsidian (Default Dark)</option>
+              <option value="subtle-border">Subtle Border Minimal</option>
+              <option value="pure-flat">Pure Flat Minimalist</option>
+              <option value="neo-brutalist">Neo-Brutalist (Stark Contrast)</option>
+              <option value="cyber-grid">Cyber Grid (Phosphor Glow)</option>
+            </select>
+          </div>
+
           <div className="space-y-1.5">
             <label className="text-xs font-mono text-muted">ACCENT COLOR</label>
             <div className="flex items-center gap-2">
@@ -390,8 +461,57 @@ export function EditorInspector() {
           <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider font-mono">
             Social Links
           </h2>
+
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-mono text-muted">QUICK TEMPLATES</span>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => handleAddPreset('tiktok', 'TikTok', 'https://tiktok.com/@')}
+                className="px-2 py-1 rounded bg-white/5 border border-white/10 text-[11px] font-mono hover:bg-white/10 text-foreground"
+              >
+                + TikTok
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAddPreset('kick', 'Kick Stream', 'https://kick.com/')}
+                className="px-2 py-1 rounded bg-white/5 border border-white/10 text-[11px] font-mono hover:bg-white/10 text-[#53FC18]"
+              >
+                + Kick
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAddPreset('instagram', 'Instagram', 'https://instagram.com/')}
+                className="px-2 py-1 rounded bg-white/5 border border-white/10 text-[11px] font-mono hover:bg-white/10 text-[#E1306C]"
+              >
+                + Instagram
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAddPreset('youtube', 'YouTube Channel', 'https://youtube.com/@')}
+                className="px-2 py-1 rounded bg-white/5 border border-white/10 text-[11px] font-mono hover:bg-white/10 text-[#FF0000]"
+              >
+                + YouTube
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAddPreset('discord', 'Discord Server', 'https://discord.gg/')}
+                className="px-2 py-1 rounded bg-white/5 border border-white/10 text-[11px] font-mono hover:bg-white/10 text-[#5865F2]"
+              >
+                + Discord
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAddPreset('spotify', 'Spotify Profile', 'https://open.spotify.com/user/')}
+                className="px-2 py-1 rounded bg-white/5 border border-white/10 text-[11px] font-mono hover:bg-white/10 text-[#1DB954]"
+              >
+                + Spotify
+              </button>
+            </div>
+          </div>
+
           <form onSubmit={handleAddLink} className="space-y-2 p-3 rounded-md border border-border bg-elevated/30">
-            <div className="text-xs font-semibold text-muted">Add New Link</div>
+            <div className="text-xs font-semibold text-muted">Add Custom Link</div>
             <Input
               placeholder="Title (e.g. My Newsletter)"
               value={newLinkTitle}
@@ -427,6 +547,73 @@ export function EditorInspector() {
                 </button>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {activeSection === 'music' && (
+        <div className="space-y-4">
+          <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider font-mono">
+            Floating Music Player
+          </h2>
+          <p className="text-[11px] text-muted">
+            Displayed as a standalone audio capsule below your profile card.
+          </p>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">TRACK TITLE</label>
+            <Input
+              value={activeTrack.trackTitle}
+              onChange={(e) => updateMusic({ trackTitle: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">ARTIST NAME</label>
+            <Input
+              value={activeTrack.artistName || ''}
+              onChange={(e) => updateMusic({ artistName: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">AUDIO SOURCE URL (MP3 / STREAM)</label>
+            <Input
+              placeholder="https://.../song.mp3"
+              value={activeTrack.sourceUrl}
+              onChange={(e) => updateMusic({ sourceUrl: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">COVER ARTWORK URL</label>
+            <Input
+              placeholder="https://.../cover.jpg"
+              value={activeTrack.artworkUrl || ''}
+              onChange={(e) => updateMusic({ artworkUrl: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-1.5 pt-1">
+            <span className="text-[11px] font-mono text-muted">PRESET COVERS</span>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { label: 'Cyber Violet', url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80' },
+                { label: 'Dark Ambient', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&auto=format&fit=crop&q=80' },
+                { label: 'Synth Skyline', url: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=300&auto=format&fit=crop&q=80' },
+                { label: 'Retro Neon', url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&auto=format&fit=crop&q=80' },
+              ].map((c) => (
+                <button
+                  key={c.label}
+                  type="button"
+                  onClick={() => updateMusic({ artworkUrl: c.url })}
+                  className="flex items-center gap-2 p-1.5 rounded border border-white/10 bg-white/5 hover:border-accent text-left text-[11px] font-mono"
+                >
+                  <img src={c.url} alt="" className="h-6 w-6 rounded object-cover" />
+                  <span className="truncate">{c.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}

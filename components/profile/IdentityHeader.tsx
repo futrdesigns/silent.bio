@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { ProfileRecord, ProfileSettingsRecord, BadgeRecord } from '@/lib/types/profile';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Eye, Crown, Flame, Sparkles } from 'lucide-react';
+import { CheckCircle2, Crown, Flame } from 'lucide-react';
 
 interface IdentityHeaderProps {
   profile: ProfileRecord;
@@ -16,7 +16,6 @@ export function IdentityHeader({
   profile,
   settings,
   badges = [],
-  viewCount = 142,
 }: IdentityHeaderProps) {
   const presenceColors: Record<string, string> = {
     online: 'bg-emerald-500',
@@ -61,6 +60,22 @@ export function IdentityHeader({
       ? 'rounded-3xl rotate-45'
       : 'rounded-full';
 
+  // Alignment classes
+  const alignment = settings.profileAlignment || 'center';
+  const alignContainerClass =
+    alignment === 'left'
+      ? 'items-start text-left'
+      : alignment === 'right'
+      ? 'items-end text-right'
+      : 'items-center text-center';
+
+  const alignBadgesClass =
+    alignment === 'left'
+      ? 'justify-start'
+      : alignment === 'right'
+      ? 'justify-end'
+      : 'justify-center';
+
   // Name effect styles
   const getNameEffectClass = () => {
     switch (settings.fontEffect) {
@@ -80,9 +95,34 @@ export function IdentityHeader({
   const glowColor = settings.avatarGlowColor || settings.accentColor || '#A5A5FF';
 
   return (
-    <div className="flex flex-col items-center text-center space-y-4">
+    <div className={`flex flex-col ${alignContainerClass} space-y-4 w-full`}>
+      {/* Top Banner with Fade Blend over bottom half */}
+      {profile.bannerUrl && (
+        <div className="-mx-6 -mt-6 mb-2 w-[calc(100%+3rem)] relative h-36 overflow-hidden rounded-t-[inherit]">
+          {settings.isAnimatedBanner && profile.bannerUrl.endsWith('.mp4') ? (
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="h-full w-full object-cover"
+            >
+              <source src={profile.bannerUrl} type="video/mp4" />
+            </video>
+          ) : (
+            <img
+              src={profile.bannerUrl}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          )}
+          {/* Bottom fade gradient mask */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-surface pointer-events-none" />
+        </div>
+      )}
+
       {/* Avatar Container with Presence Status and Custom Decorations */}
-      <div className="relative group">
+      <div className={`relative group ${profile.bannerUrl ? '-mt-14 z-10' : ''}`}>
         {/* Crown Decoration */}
         {settings.avatarDecoration === 'crown_gold' && (
           <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20 text-amber-400 animate-bounce">
@@ -100,7 +140,9 @@ export function IdentityHeader({
         {/* Decorative Ring Container */}
         <div
           className={`h-24 w-24 overflow-hidden border border-white/10 bg-surface shadow-md transition-all duration-300 group-hover:scale-105 ${shapeClass} ${
-            settings.avatarDecoration === 'neon_pulse' ? 'ring-2 ring-accent ring-offset-2 ring-offset-background animate-pulse' : ''
+            settings.avatarDecoration === 'neon_pulse'
+              ? 'ring-2 ring-accent ring-offset-2 ring-offset-background animate-pulse'
+              : ''
           }`}
           style={{
             boxShadow:
@@ -136,8 +178,8 @@ export function IdentityHeader({
       </div>
 
       {/* Identity Names & Badges */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+      <div className={`space-y-1.5 w-full flex flex-col ${alignContainerClass}`}>
+        <div className={`flex items-center gap-1.5 flex-wrap ${alignBadgesClass}`}>
           <h1
             className={`text-2xl font-bold tracking-tight transition-all ${getNameEffectClass()}`}
             style={{
@@ -156,24 +198,15 @@ export function IdentityHeader({
           )}
         </div>
 
-        <div className="flex items-center justify-center gap-2 text-xs font-mono text-muted">
+        <div className={`flex items-center gap-2 text-xs font-mono text-muted ${alignBadgesClass}`}>
           <span>@{profile.username}</span>
-          {!profile.hideViewCounter && (
+          {profile.pronouns && (
             <>
               <span>•</span>
-              <span className="flex items-center gap-1">
-                <Eye className="h-3 w-3" />
-                {viewCount.toLocaleString()}
-              </span>
+              <span className="italic">({profile.pronouns})</span>
             </>
           )}
         </div>
-
-        {profile.pronouns && (
-          <p className="text-xs text-muted font-sans italic">
-            ({profile.pronouns})
-          </p>
-        )}
       </div>
 
       {/* Bio with typewriter support */}
@@ -200,9 +233,9 @@ export function IdentityHeader({
         </div>
       )}
 
-      {/* Badges Showcase: Rich Subculture & Identity Badges */}
+      {/* Badges Showcase */}
       {badges.length > 0 && (
-        <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2 max-w-sm">
+        <div className={`flex flex-wrap items-center gap-1.5 pt-2 max-w-sm ${alignBadgesClass}`}>
           {badges.map((b) => (
             <div
               key={b.id}
