@@ -28,7 +28,13 @@ export function computeAutoBadges(username: string, uidNumber: number, existingB
     if (ogBadge) badgeMap.set('early_adopter', ogBadge);
   }
 
-  // 3. Admin user @s gets Staff badge
+  // 3. Founder badge for @s and UID #1
+  if (username.toLowerCase() === 's' || uidNumber === 1) {
+    const founderBadge = SYSTEM_BADGES.find((b) => b.id === 'founder');
+    if (founderBadge) badgeMap.set('founder', founderBadge);
+  }
+
+  // 4. Admin user @s gets Staff badge
   if (ADMIN_USERNAMES.includes(username.toLowerCase())) {
     const staffBadge = SYSTEM_BADGES.find((b) => b.id === 'staff');
     if (staffBadge) badgeMap.set('staff', staffBadge);
@@ -73,7 +79,6 @@ function initSeed() {
 
   // 1. Seed @s (Admin, UID #1)
   const sBadges = computeAutoBadges('s', 1, [
-    SYSTEM_BADGES.find((b) => b.id === 'crown_vip')!,
     SYSTEM_BADGES.find((b) => b.id === 'terminal_coder')!,
   ]);
 
@@ -118,7 +123,7 @@ function initSeed() {
       cardShadowColor: '#A5A5FF',
       cardGlowIntensity: 0.5,
       avatarShape: 'circle',
-      avatarDecoration: 'crown_gold',
+      avatarDecoration: 'glow_ring',
       avatarGlowColor: '#A5A5FF',
       fontFamily: defaultTheme.fontFamily,
       fontEffect: 'glow',

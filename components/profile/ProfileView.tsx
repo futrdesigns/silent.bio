@@ -10,9 +10,9 @@ import { MusicPlayer } from './MusicPlayer';
 import { DiscordPresenceWidget } from './DiscordPresenceWidget';
 import { CustomCursor } from './CustomCursor';
 import { TiltContainer } from './TiltContainer';
-import { ProfileCommentsAndLikes } from './ProfileCommentsAndLikes';
+import { ProfileCommentsModal } from './ProfileCommentsModal';
 import { sanitizeCustomCss } from '@/lib/security/css-sandbox';
-import { Eye, Share2, Check, QrCode } from 'lucide-react';
+import { Eye, Share2, Check, QrCode, Heart, MessageSquare } from 'lucide-react';
 
 interface ProfileViewProps {
   payload: FullProfilePayload;
@@ -26,6 +26,38 @@ export function ProfileView({ payload, isPreview = false, initialViewCount = 1 }
   const [viewCount, setViewCount] = React.useState(initialViewCount);
   const [copiedLink, setCopiedLink] = React.useState(false);
   const [showQrModal, setShowQrModal] = React.useState(false);
+
+  // Comments and Likes state
+  const [showCommentsModal, setShowCommentsModal] = React.useState(false);
+  const [commentsList, setCommentsList] = React.useState(comments);
+  const [likes, setLikes] = React.useState(profile.likesCount || 18);
+  const [hasLiked, setHasLiked] = React.useState(false);
+
+  React.useEffect(() => {
+    try {
+      const likedKey = `silent_bio_liked_${profile.username}`;
+      if (localStorage.getItem(likedKey)) {
+        setHasLiked(true);
+      }
+    } catch {}
+  }, [profile.username]);
+
+  const handleToggleLike = () => {
+    const likedKey = `silent_bio_liked_${profile.username}`;
+    if (hasLiked) {
+      setLikes((prev) => Math.max(0, prev - 1));
+      setHasLiked(false);
+      try {
+        localStorage.removeItem(likedKey);
+      } catch {}
+    } else {
+      setLikes((prev) => prev + 1);
+      setHasLiked(true);
+      try {
+        localStorage.setItem(likedKey, 'true');
+      } catch {}
+    }
+  };
 
   // Anti-viewbotting verified view tracker
   React.useEffect(() => {
@@ -262,10 +294,35 @@ export function ProfileView({ payload, isPreview = false, initialViewCount = 1 }
             className={`relative w-full p-6 transition-all duration-300 space-y-6 ${cardConfig.className}`}
             style={cardConfig.style}
           >
-            {/* Top-Right UID Counter Badge (#) */}
-            <div className="absolute top-4 right-4 z-30">
+            {/* Top-Right Action Badges: Heart Like, Comments Trigger, and UID # */}
+            <div className="absolute top-4 right-4 z-30 flex items-center gap-1.5 select-none">
+              {/* Like Heart Button */}
+              <button
+                onClick={handleToggleLike}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-md border text-[11px] font-mono transition-all duration-150 hover:scale-105 active:scale-95 backdrop-blur-md shadow-xs ${
+                  hasLiked
+                    ? 'border-rose-500/50 bg-rose-500/15 text-rose-400 font-bold'
+                    : 'border-white/10 bg-white/5 text-muted hover:text-rose-400 hover:border-rose-400/40'
+                }`}
+                title="Like profile"
+              >
+                <Heart className={`h-3 w-3 ${hasLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
+                <span>{likes}</span>
+              </button>
+
+              {/* Comment UI Modal Trigger */}
+              <button
+                onClick={() => setShowCommentsModal(true)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-md border border-white/10 bg-white/5 text-[11px] font-mono text-muted hover:text-accent hover:border-accent/40 hover:scale-105 active:scale-95 backdrop-blur-md transition-all shadow-xs"
+                title="Open Profile Guestbook & Notes"
+              >
+                <MessageSquare className="h-3 w-3 text-accent" />
+                <span>{commentsList.length}</span>
+              </button>
+
+              {/* UID Counter Badge (#) */}
               <div
-                className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono tracking-wider backdrop-blur-md shadow-sm transition-all hover:border-accent/40 hover:scale-105 select-none"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono tracking-wider backdrop-blur-md shadow-xs transition-all hover:border-accent/40 select-none"
                 title={`Unique Identifier #${profile.uidNumber}`}
               >
                 <span className="text-accent font-bold">#</span>
@@ -311,16 +368,19 @@ export function ProfileView({ payload, isPreview = false, initialViewCount = 1 }
             hasInteracted={hasEntered}
           />
         )}
-
-        {/* Profile Comments & Likes Section */}
-        <ProfileCommentsAndLikes
-          profileId={profile.id}
-          username={profile.username}
-          accentColor={settings.accentColor}
-          initialLikes={profile.likesCount || 18}
-          initialComments={comments}
-        />
       </div>
+
+      {/* Floating Top-Right Comments & Guestbook Modal */}
+      <ProfileCommentsModal
+        isOpen={showCommentsModal}
+        onClose={() => setShowCommentsModal(false)}
+        profileId={profile.id}
+        username={profile.username}
+        accentColor={settings.accentColor}
+        comments={commentsList}
+        onAddComment={(newComment) => setCommentsList((prev) => [newComment, ...prev])}
+        onDeleteComment={(commentId) => setCommentsList((prev) => prev.filter((c) => c.id !== commentId))}
+      />
     </div>
   );
 }

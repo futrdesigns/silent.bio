@@ -27,10 +27,11 @@ describe('Profile Service & Rules Verification', () => {
     expect(lateUserBadges.map((b) => b.id)).not.toContain('early_adopter');
   });
 
-  it('recognizes @s as admin, grants staff badge, and has no fake inflated views', () => {
+  it('recognizes @s as admin, grants staff and founder badges, and has no fake inflated views', () => {
     expect(ADMIN_USERNAMES).toContain('s');
 
     const sBadges = computeAutoBadges('s', 1);
+    expect(sBadges.map((b) => b.id)).toContain('founder');
     expect(sBadges.map((b) => b.id)).toContain('staff');
     expect(sBadges.map((b) => b.id)).toContain('verified');
     expect(sBadges.map((b) => b.id)).toContain('early_adopter');

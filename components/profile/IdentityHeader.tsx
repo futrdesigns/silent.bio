@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { ProfileRecord, ProfileSettingsRecord, BadgeRecord } from '@/lib/types/profile';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Crown, Flame } from 'lucide-react';
+import { CheckCircle2, Flame } from 'lucide-react';
 
 interface IdentityHeaderProps {
   profile: ProfileRecord;
@@ -129,13 +129,6 @@ export function IdentityHeader({
 
       {/* Avatar Container with Presence Status and Custom Decorations */}
       <div className={`relative group ${profile.bannerUrl ? '-mt-14 z-10' : ''}`}>
-        {/* Crown Decoration */}
-        {settings.avatarDecoration === 'crown_gold' && (
-          <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20 text-amber-400 animate-bounce">
-            <Crown className="h-6 w-6 fill-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
-          </div>
-        )}
-
         {/* Fire Ring Decoration */}
         {settings.avatarDecoration === 'fire_ring' && (
           <div className="absolute -top-3 -right-2 z-20 text-orange-500 animate-pulse">
