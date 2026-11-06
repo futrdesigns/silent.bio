@@ -25,7 +25,7 @@ interface EditorState {
   isDraft: boolean;
 
   // Actions
-  initUser: (username: string, displayName?: string) => void;
+  initUser: (username: string, displayName?: string, customUid?: number) => void;
   setActiveSection: (section: string) => void;
   setPreviewDevice: (device: 'desktop' | 'tablet' | 'mobile') => void;
   updateProfile: (partial: Partial<ProfileRecord>) => void;
@@ -153,11 +153,30 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   autosaveStatus: 'saved',
   isDraft: false,
 
-  initUser: (rawUsername: string, rawDisplayName?: string) => {
+  initUser: (rawUsername: string, rawDisplayName?: string, customUid?: number) => {
     const username = rawUsername.toLowerCase().trim();
     const displayName = rawDisplayName || (username.charAt(0).toUpperCase() + username.slice(1));
     const isUserAdmin = ADMIN_USERNAMES.includes(username);
-    const uid = username === 's' ? 1 : 42; // @s is UID #1, early users <= 50
+
+    let uid = customUid;
+    if (!uid) {
+      if (username === 's') {
+        uid = 1;
+      } else {
+        try {
+          const stored = localStorage.getItem('silent_bio_user');
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed.username === username && parsed.uidNumber) {
+              uid = Number(parsed.uidNumber);
+            }
+          }
+        } catch {
+          // Fallback
+        }
+        if (!uid) uid = 2;
+      }
+    }
 
     // Compute automatic badges: everyone gets verified, first 50 get OG badge, admins get staff
     const badges = computeAutoBadges(username, uid);

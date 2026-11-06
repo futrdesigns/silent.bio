@@ -48,6 +48,22 @@ export function computeAutoBadges(username: string, uidNumber: number, existingB
  */
 const MEMORY_PROFILES = new Map<string, FullProfilePayload>();
 const VIEW_COUNTS = new Map<string, number>();
+const EMAIL_TO_USERNAME = new Map<string, string>();
+
+/**
+ * Link an email to a registered username
+ */
+export function linkEmailToUsername(email: string, username: string) {
+  EMAIL_TO_USERNAME.set(email.toLowerCase().trim(), username.toLowerCase().trim());
+}
+
+/**
+ * Retrieve username linked to an email address
+ */
+export function getUsernameByEmail(email: string): string | null {
+  initSeed();
+  return EMAIL_TO_USERNAME.get(email.toLowerCase().trim()) || null;
+}
 
 // Seed default accounts
 function initSeed() {
@@ -145,6 +161,8 @@ function initSeed() {
     badges: sBadges,
   });
   VIEW_COUNTS.set('s', 1);
+  EMAIL_TO_USERNAME.set('s@silent.bio', 's');
+  EMAIL_TO_USERNAME.set('admin@silent.bio', 's');
 }
 
 initSeed();

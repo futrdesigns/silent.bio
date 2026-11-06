@@ -30,14 +30,14 @@ export function EditorNavigation() {
   const { payload, activeSection, setActiveSection, undo, redo, history } = useEditorStore();
 
   const navItems = [
-    { id: 'general', label: 'General', icon: User },
-    ...(payload.profile.isAdmin ? [{ id: 'badges', label: 'Badges (Admin)', icon: Shield }] : []),
-    { id: 'appearance', label: 'Appearance', icon: Palette },
-    { id: 'themes', label: 'Themes', icon: Sparkles },
-    { id: 'links', label: 'Links', icon: LinkIcon },
-    { id: 'music', label: 'Music Player', icon: Music },
-    { id: 'intro', label: 'Intro Screen (guns.lol)', icon: Sparkles },
-    { id: 'effects', label: 'Effects & Cursors', icon: Sparkles },
+    { id: 'general', label: 'Identity & Bio', icon: User },
+    ...(payload.profile.isAdmin ? [{ id: 'badges', label: 'Admin Badges', icon: Shield }] : []),
+    { id: 'appearance', label: 'Card & Typography', icon: Palette },
+    { id: 'themes', label: 'Theme Presets (18)', icon: Sparkles },
+    { id: 'links', label: 'Social Links', icon: LinkIcon },
+    { id: 'music', label: 'Music Player Capsule', icon: Music },
+    { id: 'intro', label: 'guns.lol Intro Screen', icon: Sparkles },
+    { id: 'effects', label: 'Cursors, Trails & FX', icon: Sparkles },
     { id: 'custom-css', label: 'Custom CSS', icon: Code },
   ];
 
