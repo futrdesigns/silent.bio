@@ -1,0 +1,16 @@
+{
+  "/api/analytics/collect/route": "app/api/analytics/collect/route.js",
+  "/api/auth/check-username/route": "app/api/auth/check-username/route.js",
+  "/api/v1/profiles/[username]/route": "app/api/v1/profiles/[username]/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/(marketing)/explore/page": "app/(marketing)/explore/page.js",
+  "/(dashboard)/dashboard/overview/page": "app/(dashboard)/dashboard/overview/page.js",
+  "/(auth)/register/page": "app/(auth)/register/page.js",
+  "/(marketing)/faq/page": "app/(marketing)/faq/page.js",
+  "/(marketing)/themes/page": "app/(marketing)/themes/page.js",
+  "/[username]/page": "app/[username]/page.js",
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(marketing)/features/page": "app/(marketing)/features/page.js",
+  "/editor/page": "app/editor/page.js",
+  "/page": "app/page.js"
+}
