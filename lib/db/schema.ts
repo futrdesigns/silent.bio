@@ -1,0 +1,130 @@
+import { pgTable, text, uuid, bigint, boolean, timestamp, integer, numeric, jsonb } from 'drizzle-orm/pg-core';
+
+export const profiles = pgTable('profiles', {
+  id: uuid('id').primaryKey(),
+  username: text('username').notNull().unique(),
+  displayName: text('display_name').notNull(),
+  bio: text('bio').default(''),
+  avatarUrl: text('avatar_url'),
+  bannerUrl: text('banner_url'),
+  location: text('location').default(''),
+  pronouns: text('pronouns').default(''),
+  customStatus: text('custom_status').default(''),
+  presenceStatus: text('presence_status').default('offline'),
+  discordUserId: text('discord_user_id'),
+  uidNumber: bigint('uid_number', { mode: 'number' }).unique(),
+  isVerified: boolean('is_verified').default(false),
+  isAdmin: boolean('is_admin').default(false),
+  isBanned: boolean('is_banned').default(false),
+  hideFromExplore: boolean('hide_from_explore').default(false),
+  hideViewCounter: boolean('hide_view_counter').default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+});
+
+export const profileSettings = pgTable('profile_settings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  profileId: uuid('profile_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  themeId: text('theme_id').default('midnight').notNull(),
+  layoutPreset: text('layout_preset').default('centered').notNull(),
+  bgType: text('bg_type').default('solid').notNull(),
+  bgValue: text('bg_value').default('#08090B').notNull(),
+  bgBlur: integer('bg_blur').default(0),
+  bgDim: integer('bg_dim').default(0),
+  cardOpacity: numeric('card_opacity').default('0.90'),
+  cardRadius: text('card_radius').default('12px'),
+  cardBorderColor: text('card_border_color').default('rgba(255, 255, 255, 0.08)'),
+  cardBorderWidth: text('card_border_width').default('1px'),
+  fontFamily: text('font_family').default('Geist Sans'),
+  fontEffect: text('font_effect').default('none'),
+  accentColor: text('accent_color').default('#A5A5FF'),
+  textColor: text('text_color').default('#F5F5F5'),
+  activeEffect: text('active_effect').default('none'),
+  effectIntensity: numeric('effect_intensity').default('0.50'),
+  cursorEffect: text('cursor_effect').default('none'),
+  customCss: text('custom_css').default(''),
+  enableSplashScreen: boolean('enable_splash_screen').default(true),
+  splashText: text('splash_text').default('Click to Enter'),
+  audioAutoplayUnlocked: boolean('audio_autoplay_unlocked').default(false),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const socialLinks = pgTable('social_links', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  profileId: uuid('profile_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  platform: text('platform').notNull(),
+  url: text('url').notNull(),
+  title: text('title').notNull(),
+  description: text('description').default(''),
+  customIcon: text('custom_icon'),
+  customColor: text('custom_color'),
+  displayStyle: text('display_style').default('card').notNull(),
+  orderIndex: integer('order_index').default(0).notNull(),
+  groupName: text('group_name').default(''),
+  isActive: boolean('is_active').default(true).notNull(),
+  passwordHash: text('password_hash'),
+  isCopyAction: boolean('is_copy_action').default(false),
+  clicksCount: bigint('clicks_count', { mode: 'number' }).default(0).notNull(),
+  scheduledStart: timestamp('scheduled_start', { withTimezone: true }),
+  scheduledEnd: timestamp('scheduled_end', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const profileComponents = pgTable('profile_components', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  profileId: uuid('profile_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  componentType: text('component_type').notNull(),
+  title: text('title').default(''),
+  contentPayload: jsonb('content_payload').default({}).notNull(),
+  orderIndex: integer('order_index').default(0).notNull(),
+  colSpan: integer('col_span').default(1),
+  rowSpan: integer('row_span').default(1),
+  isActive: boolean('is_active').default(true).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const profileMusic = pgTable('profile_music', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  profileId: uuid('profile_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  sourceType: text('source_type').notNull(),
+  trackTitle: text('track_title').notNull(),
+  artistName: text('artist_name').default(''),
+  sourceUrl: text('source_url').notNull(),
+  artworkUrl: text('artwork_url'),
+  audioDuration: integer('audio_duration').default(0),
+  orderIndex: integer('order_index').default(0).notNull(),
+  isAutoplay: boolean('is_autoplay').default(false).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const profileAnalytics = pgTable('profile_analytics', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  profileId: uuid('profile_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  visitorHash: text('visitor_hash').notNull(),
+  linkId: uuid('link_id').references(() => socialLinks.id, { onDelete: 'set null' }),
+  referrerDomain: text('referrer_domain').default(''),
+  countryCode: text('country_code').default('UNKNOWN'),
+  deviceType: text('device_type').default('desktop'),
+  browserFamily: text('browser_family').default('Other'),
+  osFamily: text('os_family').default('Other'),
+  isBot: boolean('is_bot').default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const badges = pgTable('badges', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description'),
+  iconSvg: text('icon_svg').notNull(),
+  badgeType: text('badge_type').default('earned'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const userBadges = pgTable('user_badges', {
+  profileId: uuid('profile_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  badgeId: text('badge_id').notNull().references(() => badges.id, { onDelete: 'cascade' }),
+  awardedAt: timestamp('awarded_at', { withTimezone: true }).defaultNow().notNull(),
+});

@@ -1,0 +1,126 @@
+export type PresenceStatus = 'online' | 'idle' | 'dnd' | 'offline';
+
+export type LayoutPreset = 'centered' | 'split' | 'left-aligned' | 'bento' | 'minimal-list' | 'full-bleed';
+
+export type BgType = 'solid' | 'gradient' | 'image' | 'video' | 'mesh' | 'noise';
+
+export type FontEffect = 'none' | 'glow' | 'shimmer' | 'gradient' | 'typewriter';
+
+export type ActiveEffect = 'none' | 'snow' | 'stars' | 'rain' | 'embers' | 'particles';
+
+export type CursorEffect = 'none' | 'trail' | 'glow' | 'ring';
+
+export type LinkDisplayStyle = 'icon-only' | 'pill' | 'card' | 'full-width' | 'glow' | 'outline' | 'brand' | 'minimal-text';
+
+export interface ProfileRecord {
+  id: string;
+  username: string;
+  displayName: string;
+  bio: string;
+  avatarUrl: string | null;
+  bannerUrl: string | null;
+  location: string;
+  pronouns: string;
+  customStatus: string;
+  presenceStatus: PresenceStatus;
+  discordUserId: string | null;
+  uidNumber: number;
+  isVerified: boolean;
+  isAdmin: boolean;
+  isBanned: boolean;
+  hideFromExplore: boolean;
+  hideViewCounter: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProfileSettingsRecord {
+  id: string;
+  profileId: string;
+  themeId: string;
+  layoutPreset: LayoutPreset;
+  bgType: BgType;
+  bgValue: string;
+  bgBlur: number;
+  bgDim: number;
+  cardOpacity: number;
+  cardRadius: string;
+  cardBorderColor: string;
+  cardBorderWidth: string;
+  fontFamily: string;
+  fontEffect: FontEffect;
+  accentColor: string;
+  textColor: string;
+  activeEffect: ActiveEffect;
+  effectIntensity: number;
+  cursorEffect: CursorEffect;
+  customCss: string;
+  enableSplashScreen: boolean;
+  splashText: string;
+  audioAutoplayUnlocked: boolean;
+  updatedAt: string;
+}
+
+export interface SocialLinkRecord {
+  id: string;
+  profileId: string;
+  platform: string;
+  url: string;
+  title: string;
+  description: string;
+  customIcon?: string | null;
+  customColor?: string | null;
+  displayStyle: LinkDisplayStyle;
+  orderIndex: number;
+  groupName: string;
+  isActive: boolean;
+  isCopyAction: boolean;
+  clicksCount: number;
+  scheduledStart?: string | null;
+  scheduledEnd?: string | null;
+  createdAt: string;
+}
+
+export interface ProfileComponentRecord {
+  id: string;
+  profileId: string;
+  componentType: string;
+  title: string;
+  contentPayload: Record<string, any>;
+  orderIndex: number;
+  colSpan: number;
+  rowSpan: number;
+  isActive: boolean;
+}
+
+export interface ProfileMusicRecord {
+  id: string;
+  profileId: string;
+  sourceType: 'spotify' | 'soundcloud' | 'youtube' | 'upload';
+  trackTitle: string;
+  artistName: string;
+  sourceUrl: string;
+  artworkUrl?: string | null;
+  audioDuration: number;
+  orderIndex: number;
+  isAutoplay: boolean;
+  createdAt?: string;
+}
+
+export interface BadgeRecord {
+  id: string;
+  name: string;
+  description: string;
+  iconSvg: string;
+  badgeType: string;
+  color?: string;
+}
+
+export interface FullProfilePayload {
+  profile: ProfileRecord;
+  settings: ProfileSettingsRecord;
+  links: SocialLinkRecord[];
+  components: ProfileComponentRecord[];
+  music: ProfileMusicRecord[];
+  badges: BadgeRecord[];
+}

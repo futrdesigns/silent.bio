@@ -1,0 +1,322 @@
+import { create } from 'zustand';
+import {
+  FullProfilePayload,
+  ProfileRecord,
+  ProfileSettingsRecord,
+  SocialLinkRecord,
+  ProfileComponentRecord,
+} from '@/lib/types/profile';
+import { BUILTIN_THEMES } from '@/lib/themes/presets';
+import { SYSTEM_BADGES } from '@/lib/db/seed/seed-data';
+
+interface HistoryState {
+  past: FullProfilePayload[];
+  future: FullProfilePayload[];
+}
+
+interface EditorState {
+  payload: FullProfilePayload;
+  history: HistoryState;
+  activeSection: string;
+  previewDevice: 'desktop' | 'tablet' | 'mobile';
+  autosaveStatus: 'saved' | 'saving' | 'dirty';
+  isDraft: boolean;
+
+  // Actions
+  setActiveSection: (section: string) => void;
+  setPreviewDevice: (device: 'desktop' | 'tablet' | 'mobile') => void;
+  updateProfile: (partial: Partial<ProfileRecord>) => void;
+  updateSettings: (partial: Partial<ProfileSettingsRecord>) => void;
+  applyTheme: (themeId: string) => void;
+  addLink: (link: Omit<SocialLinkRecord, 'id' | 'profileId' | 'orderIndex' | 'clicksCount' | 'createdAt'>) => void;
+  updateLink: (id: string, partial: Partial<SocialLinkRecord>) => void;
+  removeLink: (id: string) => void;
+  reorderLinks: (links: SocialLinkRecord[]) => void;
+  toggleBadge: (badge: typeof SYSTEM_BADGES[number]) => void;
+  undo: () => void;
+  redo: () => void;
+  publish: () => Promise<void>;
+}
+
+const initialMidnight = BUILTIN_THEMES.midnight;
+
+const defaultInitialPayload: FullProfilePayload = {
+  profile: {
+    id: 'usr_me',
+    username: 'creator',
+    displayName: 'Creator',
+    bio: 'Crafting thoughtful spaces on the open web.',
+    avatarUrl: null,
+    bannerUrl: null,
+    location: '',
+    pronouns: '',
+    customStatus: '',
+    presenceStatus: 'online',
+    discordUserId: null,
+    uidNumber: 1,
+    isVerified: true,
+    isAdmin: false,
+    isBanned: false,
+    hideFromExplore: false,
+    hideViewCounter: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  settings: {
+    id: 'set_me',
+    profileId: 'usr_me',
+    themeId: 'midnight',
+    layoutPreset: 'centered',
+    bgType: initialMidnight.bgType,
+    bgValue: initialMidnight.bgValue,
+    bgBlur: 0,
+    bgDim: 0,
+    cardOpacity: initialMidnight.cardOpacity,
+    cardRadius: initialMidnight.cardRadius,
+    cardBorderColor: initialMidnight.cardBorderColor,
+    cardBorderWidth: initialMidnight.cardBorderWidth,
+    fontFamily: initialMidnight.fontFamily,
+    fontEffect: 'none',
+    accentColor: initialMidnight.accentColor,
+    textColor: initialMidnight.textColor,
+    activeEffect: 'stars',
+    effectIntensity: 0.5,
+    cursorEffect: 'none',
+    customCss: '',
+    enableSplashScreen: false,
+    splashText: 'Click to Enter',
+    audioAutoplayUnlocked: true,
+    updatedAt: new Date().toISOString(),
+  },
+  links: [
+    {
+      id: 'lnk_1',
+      profileId: 'usr_me',
+      platform: 'github',
+      url: 'https://github.com',
+      title: 'GitHub Repositories',
+      description: 'Open source work',
+      displayStyle: 'card',
+      orderIndex: 0,
+      groupName: '',
+      isActive: true,
+      isCopyAction: false,
+      clicksCount: 0,
+      createdAt: new Date().toISOString(),
+    },
+  ],
+  components: [],
+  music: [],
+  badges: SYSTEM_BADGES.slice(0, 6),
+};
+
+export const useEditorStore = create<EditorState>((set, get) => ({
+  payload: defaultInitialPayload,
+  history: { past: [], future: [] },
+  activeSection: 'general',
+  previewDevice: 'desktop',
+  autosaveStatus: 'saved',
+  isDraft: false,
+
+  setActiveSection: (activeSection) => set({ activeSection }),
+  setPreviewDevice: (previewDevice) => set({ previewDevice }),
+
+  updateProfile: (partial) => {
+    const { payload, history } = get();
+    set({
+      history: {
+        past: [...history.past, payload],
+        future: [],
+      },
+      payload: {
+        ...payload,
+        profile: { ...payload.profile, ...partial, updatedAt: new Date().toISOString() },
+      },
+      autosaveStatus: 'dirty',
+      isDraft: true,
+    });
+  },
+
+  updateSettings: (partial) => {
+    const { payload, history } = get();
+    set({
+      history: {
+        past: [...history.past, payload],
+        future: [],
+      },
+      payload: {
+        ...payload,
+        settings: { ...payload.settings, ...partial, updatedAt: new Date().toISOString() },
+      },
+      autosaveStatus: 'dirty',
+      isDraft: true,
+    });
+  },
+
+  applyTheme: (themeId) => {
+    const theme = BUILTIN_THEMES[themeId];
+    if (!theme) return;
+
+    const { payload, history } = get();
+    set({
+      history: {
+        past: [...history.past, payload],
+        future: [],
+      },
+      payload: {
+        ...payload,
+        settings: {
+          ...payload.settings,
+          themeId: theme.id,
+          bgType: theme.bgType,
+          bgValue: theme.bgValue,
+          accentColor: theme.accentColor,
+          textColor: theme.textColor,
+          cardOpacity: theme.cardOpacity,
+          cardRadius: theme.cardRadius,
+          cardBorderColor: theme.cardBorderColor,
+          cardBorderWidth: theme.cardBorderWidth,
+          fontFamily: theme.fontFamily,
+          activeEffect: theme.activeEffect || 'none',
+          updatedAt: new Date().toISOString(),
+        },
+      },
+      autosaveStatus: 'dirty',
+      isDraft: true,
+    });
+  },
+
+  addLink: (linkData) => {
+    const { payload, history } = get();
+    const newLink: SocialLinkRecord = {
+      ...linkData,
+      id: `lnk_${Date.now()}`,
+      profileId: payload.profile.id,
+      orderIndex: payload.links.length,
+      clicksCount: 0,
+      createdAt: new Date().toISOString(),
+    };
+
+    set({
+      history: {
+        past: [...history.past, payload],
+        future: [],
+      },
+      payload: {
+        ...payload,
+        links: [...payload.links, newLink],
+      },
+      autosaveStatus: 'dirty',
+      isDraft: true,
+    });
+  },
+
+  updateLink: (id, partial) => {
+    const { payload, history } = get();
+    set({
+      history: {
+        past: [...history.past, payload],
+        future: [],
+      },
+      payload: {
+        ...payload,
+        links: payload.links.map((l) => (l.id === id ? { ...l, ...partial } : l)),
+      },
+      autosaveStatus: 'dirty',
+      isDraft: true,
+    });
+  },
+
+  removeLink: (id) => {
+    const { payload, history } = get();
+    set({
+      history: {
+        past: [...history.past, payload],
+        future: [],
+      },
+      payload: {
+        ...payload,
+        links: payload.links.filter((l) => l.id !== id),
+      },
+      autosaveStatus: 'dirty',
+      isDraft: true,
+    });
+  },
+
+  reorderLinks: (links) => {
+    const { payload, history } = get();
+    set({
+      history: {
+        past: [...history.past, payload],
+        future: [],
+      },
+      payload: {
+        ...payload,
+        links,
+      },
+      autosaveStatus: 'dirty',
+      isDraft: true,
+    });
+  },
+
+  toggleBadge: (badge) => {
+    const { payload, history } = get();
+    const hasBadge = payload.badges.some((b) => b.id === badge.id);
+    const updatedBadges = hasBadge
+      ? payload.badges.filter((b) => b.id !== badge.id)
+      : [...payload.badges, badge];
+
+    set({
+      history: {
+        past: [...history.past, payload],
+        future: [],
+      },
+      payload: {
+        ...payload,
+        badges: updatedBadges,
+      },
+      autosaveStatus: 'dirty',
+      isDraft: true,
+    });
+  },
+
+  undo: () => {
+    const { history, payload } = get();
+    if (history.past.length === 0) return;
+
+    const previous = history.past[history.past.length - 1];
+    const newPast = history.past.slice(0, history.past.length - 1);
+
+    set({
+      payload: previous,
+      history: {
+        past: newPast,
+        future: [payload, ...history.future],
+      },
+      autosaveStatus: 'dirty',
+    });
+  },
+
+  redo: () => {
+    const { history, payload } = get();
+    if (history.future.length === 0) return;
+
+    const next = history.future[0];
+    const newFuture = history.future.slice(1);
+
+    set({
+      payload: next,
+      history: {
+        past: [...history.past, payload],
+        future: newFuture,
+      },
+      autosaveStatus: 'dirty',
+    });
+  },
+
+  publish: async () => {
+    set({ autosaveStatus: 'saving' });
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    set({ autosaveStatus: 'saved', isDraft: false });
+  },
+}));
