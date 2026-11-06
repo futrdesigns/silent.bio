@@ -48,14 +48,16 @@ export default function RegisterPage() {
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    // Mock client registration persistence for local workflow
+    // Client registration persistence for local workflow
     try {
+      const cleanUsername = username.toLowerCase().trim();
       localStorage.setItem('silent_bio_user', JSON.stringify({
-        username: username.toLowerCase().trim(),
-        displayName: displayName || username,
+        username: cleanUsername,
+        displayName: displayName || cleanUsername,
         email,
       }));
-      router.push('/editor');
+      // Route immediately to the sub handle profile: /{username}
+      router.push(`/${cleanUsername}`);
     } catch (err: any) {
       setErrorMessage(err.message || 'Registration failed');
     } finally {

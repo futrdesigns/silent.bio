@@ -8,6 +8,7 @@ import {
 } from '@/lib/types/profile';
 import { BUILTIN_THEMES } from '@/lib/themes/presets';
 import { SYSTEM_BADGES } from '@/lib/db/seed/seed-data';
+import { computeAutoBadges, ADMIN_USERNAMES, saveProfile } from '@/lib/db/profile-service';
 
 interface HistoryState {
   past: FullProfilePayload[];
@@ -23,6 +24,7 @@ interface EditorState {
   isDraft: boolean;
 
   // Actions
+  initUser: (username: string, displayName?: string) => void;
   setActiveSection: (section: string) => void;
   setPreviewDevice: (device: 'desktop' | 'tablet' | 'mobile') => void;
   updateProfile: (partial: Partial<ProfileRecord>) => void;
@@ -75,17 +77,31 @@ const defaultInitialPayload: FullProfilePayload = {
     cardRadius: initialMidnight.cardRadius,
     cardBorderColor: initialMidnight.cardBorderColor,
     cardBorderWidth: initialMidnight.cardBorderWidth,
+    cardShadowGlow: 'soft',
+    cardShadowColor: initialMidnight.accentColor,
+    cardGlowIntensity: 0.35,
+    avatarShape: 'circle',
+    avatarDecoration: 'glow_ring',
+    avatarGlowColor: initialMidnight.accentColor,
     fontFamily: initialMidnight.fontFamily,
     fontEffect: 'none',
     accentColor: initialMidnight.accentColor,
     textColor: initialMidnight.textColor,
+    bioTextColor: '#92949D',
     activeEffect: 'stars',
     effectIntensity: 0.5,
-    cursorEffect: 'none',
+    cursorEffect: 'ring',
+    cursorCustomUrl: '',
+    tiltEffect: true,
+    typewriterBio: false,
+    crtScanlines: false,
     customCss: '',
     enableSplashScreen: false,
     splashText: 'Click to Enter',
+    splashSubtext: 'Silence speaks volumes',
     audioAutoplayUnlocked: true,
+    audioVisualizerType: 'bars',
+    audioVolume: 80,
     updatedAt: new Date().toISOString(),
   },
   links: [
@@ -117,6 +133,34 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   previewDevice: 'desktop',
   autosaveStatus: 'saved',
   isDraft: false,
+
+  initUser: (rawUsername: string, rawDisplayName?: string) => {
+    const username = rawUsername.toLowerCase().trim();
+    const displayName = rawDisplayName || (username.charAt(0).toUpperCase() + username.slice(1));
+    const isUserAdmin = ADMIN_USERNAMES.includes(username);
+    const uid = username === 's' ? 1 : 42; // @s is UID #1, early users <= 50
+
+    // Compute automatic badges: everyone gets verified, first 50 get OG badge, admins get staff
+    const badges = computeAutoBadges(username, uid);
+
+    const { payload } = get();
+    set({
+      payload: {
+        ...payload,
+        profile: {
+          ...payload.profile,
+          id: `usr_${username}`,
+          username,
+          displayName,
+          uidNumber: uid,
+          isVerified: true, // Everyone with a profile is verified!
+          isAdmin: isUserAdmin,
+        },
+        badges,
+      },
+      autosaveStatus: 'saved',
+    });
+  },
 
   setActiveSection: (activeSection) => set({ activeSection }),
   setPreviewDevice: (previewDevice) => set({ previewDevice }),
@@ -316,7 +360,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   publish: async () => {
     set({ autosaveStatus: 'saving' });
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const { payload } = get();
+    await saveProfile(payload);
+    await new Promise((resolve) => setTimeout(resolve, 300));
     set({ autosaveStatus: 'saved', isDraft: false });
   },
 }));

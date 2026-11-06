@@ -27,11 +27,11 @@ import { SYSTEM_BADGES } from '@/lib/db/seed/seed-data';
 import { ProfileView } from '@/components/profile/ProfileView';
 
 export function EditorNavigation() {
-  const { activeSection, setActiveSection, undo, redo, history } = useEditorStore();
+  const { payload, activeSection, setActiveSection, undo, redo, history } = useEditorStore();
 
   const navItems = [
     { id: 'general', label: 'General', icon: User },
-    { id: 'badges', label: 'Badges', icon: Shield },
+    ...(payload.profile.isAdmin ? [{ id: 'badges', label: 'Badges (Admin)', icon: Shield }] : []),
     { id: 'appearance', label: 'Appearance', icon: Palette },
     { id: 'themes', label: 'Themes', icon: Sparkles },
     { id: 'links', label: 'Links', icon: LinkIcon },
@@ -169,17 +169,47 @@ export function EditorInspector() {
               onChange={(e) => updateProfile({ pronouns: e.target.value })}
             />
           </div>
+
+          <div className="space-y-2 pt-2 border-t border-border">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-mono text-muted">YOUR BADGES</label>
+              <span className="text-[10px] font-mono text-accent">AUTOMATIC</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {payload.badges.map((b) => (
+                <div
+                  key={b.id}
+                  className="flex items-center gap-1 px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[11px] font-mono"
+                  style={{ color: b.color }}
+                  title={b.description}
+                >
+                  <span
+                    className="h-3 w-3 inline-block"
+                    dangerouslySetInnerHTML={{ __html: b.iconSvg }}
+                  />
+                  <span>{b.name}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-[10px] text-muted leading-tight">
+              Every verified creator receives the Verified mark. First 50 claimers receive the OG badge automatically. Badges can only be granted by administrators.
+            </p>
+          </div>
         </div>
       )}
 
       {activeSection === 'badges' && (
         <div className="space-y-4">
           <div>
-            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider font-mono">
-              Profile Badges
+            <div className="flex items-center gap-1.5 text-accent font-mono text-xs font-bold uppercase">
+              <Shield className="h-3.5 w-3.5" />
+              <span>Admin Badge Controls</span>
+            </div>
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider font-mono mt-1">
+              Grant &amp; Revoke Badges
             </h2>
             <p className="text-[11px] text-muted mt-1">
-              Toggle subculture and identity badges displayed on your card (alias.rip &amp; fakecrime inspired).
+              Signed in as verified admin (@{payload.profile.username}). Toggle identity tags across users.
             </p>
           </div>
           <div className="space-y-2">
@@ -225,7 +255,7 @@ export function EditorInspector() {
       {activeSection === 'appearance' && (
         <div className="space-y-4">
           <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider font-mono">
-            Appearance
+            Appearance &amp; Glow
           </h2>
           <div className="space-y-1.5">
             <label className="text-xs font-mono text-muted">ACCENT COLOR</label>
@@ -243,11 +273,81 @@ export function EditorInspector() {
               />
             </div>
           </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">AVATAR DECORATION FRAME</label>
+            <select
+              className="w-full h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+              value={payload.settings.avatarDecoration}
+              onChange={(e) => updateSettings({ avatarDecoration: e.target.value as any })}
+            >
+              <option value="none">None</option>
+              <option value="glow_ring">Aura Glow Ring</option>
+              <option value="neon_pulse">Neon Pulse Ring</option>
+              <option value="crown_gold">VIP Gold Crown</option>
+              <option value="fire_ring">Flame Flare</option>
+              <option value="cyber_bracket">Cyber Brackets</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">AVATAR SHAPE</label>
+            <select
+              className="w-full h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+              value={payload.settings.avatarShape}
+              onChange={(e) => updateSettings({ avatarShape: e.target.value as any })}
+            >
+              <option value="circle">Circle</option>
+              <option value="squircle">Squircle (Rounded)</option>
+              <option value="square">Stark Square</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">CARD SHADOW &amp; GLOW</label>
+            <select
+              className="w-full h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+              value={payload.settings.cardShadowGlow}
+              onChange={(e) => updateSettings({ cardShadowGlow: e.target.value as any })}
+            >
+              <option value="none">Subtle Dark Border</option>
+              <option value="soft">Soft Ambient Halo</option>
+              <option value="strong">Intense Elevation</option>
+              <option value="neon">Neon Laser Glow</option>
+              <option value="diffuse">Diffuse Vapor Spread</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">NAME EFFECT</label>
+            <select
+              className="w-full h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+              value={payload.settings.fontEffect}
+              onChange={(e) => updateSettings({ fontEffect: e.target.value as any })}
+            >
+              <option value="none">Standard Crisp</option>
+              <option value="glow">Neon Glow</option>
+              <option value="shimmer">Silver Shimmer Pulse</option>
+              <option value="rainbow">Chromatic RGB Gradient</option>
+              <option value="glitch">Glitch Mono</option>
+            </select>
+          </div>
+
           <div className="space-y-1.5">
             <label className="text-xs font-mono text-muted">CARD RADIUS</label>
             <Input
               value={payload.settings.cardRadius}
               onChange={(e) => updateSettings({ cardRadius: e.target.value })}
+            />
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
+            <label className="text-xs font-mono text-muted">TYPEWRITER BIO EFFECT</label>
+            <input
+              type="checkbox"
+              className="rounded border-border accent-accent cursor-pointer"
+              checked={payload.settings.typewriterBio}
+              onChange={(e) => updateSettings({ typewriterBio: e.target.checked })}
             />
           </div>
         </div>
@@ -334,22 +434,61 @@ export function EditorInspector() {
       {activeSection === 'effects' && (
         <div className="space-y-4">
           <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider font-mono">
-            Ambient Effects
+            Ambient &amp; Cursor Effects
           </h2>
-          <div className="space-y-2">
-            {(['none', 'stars', 'snow', 'rain', 'embers', 'particles'] as const).map((eff) => (
-              <button
-                key={eff}
-                onClick={() => updateSettings({ activeEffect: eff })}
-                className={`w-full text-left px-3 py-2 rounded text-xs border capitalize transition-colors ${
-                  payload.settings.activeEffect === eff
-                    ? 'border-accent bg-accent/10 text-foreground font-semibold'
-                    : 'border-border bg-elevated/40 text-muted hover:border-border-strong'
-                }`}
-              >
-                {eff}
-              </button>
-            ))}
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-mono text-muted">CUSTOM MOUSE CURSOR</label>
+            <select
+              className="w-full h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+              value={payload.settings.cursorEffect}
+              onChange={(e) => updateSettings({ cursorEffect: e.target.value as any })}
+            >
+              <option value="none">Default Pointer</option>
+              <option value="ring">Aesthetic Ring Indicator</option>
+              <option value="glow">Neon Glow Orb</option>
+              <option value="trail">Shooting Star Particles Trail</option>
+              <option value="crosshair">Sniper Crosshair</option>
+            </select>
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
+            <label className="text-xs font-mono text-muted">3D CARD TILT ON HOVER</label>
+            <input
+              type="checkbox"
+              className="rounded border-border accent-accent cursor-pointer"
+              checked={payload.settings.tiltEffect}
+              onChange={(e) => updateSettings({ tiltEffect: e.target.checked })}
+            />
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
+            <label className="text-xs font-mono text-muted">CRT SCANLINES OVERLAY</label>
+            <input
+              type="checkbox"
+              className="rounded border-border accent-accent cursor-pointer"
+              checked={payload.settings.crtScanlines}
+              onChange={(e) => updateSettings({ crtScanlines: e.target.checked })}
+            />
+          </div>
+
+          <div className="space-y-1.5 pt-2">
+            <label className="text-xs font-mono text-muted">BACKGROUND PARTICLES / WEATHER</label>
+            <div className="space-y-1.5">
+              {(['none', 'stars', 'snow', 'rain', 'embers', 'particles', 'matrix', 'crt_lines'] as const).map((eff) => (
+                <button
+                  key={eff}
+                  onClick={() => updateSettings({ activeEffect: eff })}
+                  className={`w-full text-left px-3 py-1.5 rounded text-xs border capitalize transition-colors ${
+                    payload.settings.activeEffect === eff
+                      ? 'border-accent bg-accent/10 text-foreground font-semibold'
+                      : 'border-border bg-elevated/40 text-muted hover:border-border-strong'
+                  }`}
+                >
+                  {eff.replace('_', ' ')}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}

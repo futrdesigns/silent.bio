@@ -6,6 +6,7 @@ import { ActiveEffect } from '@/lib/types/profile';
 interface EffectsCanvasProps {
   effect: ActiveEffect;
   intensity?: number;
+  crtScanlines?: boolean;
 }
 
 interface Particle {
@@ -16,15 +17,15 @@ interface Particle {
   size: number;
   alpha: number;
   fadeSpeed: number;
+  char?: string;
 }
 
-export function EffectsCanvas({ effect, intensity = 0.5 }: EffectsCanvasProps) {
+export function EffectsCanvas({ effect, intensity = 0.5, crtScanlines = false }: EffectsCanvasProps) {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 
   React.useEffect(() => {
-    if (effect === 'none') return;
+    if (effect === 'none' && !crtScanlines) return;
 
-    // Check prefers-reduced-motion
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
@@ -46,6 +47,7 @@ export function EffectsCanvas({ effect, intensity = 0.5 }: EffectsCanvasProps) {
     };
     window.addEventListener('resize', handleResize);
 
+    const matrixChars = '0123456789ABCDEF$#@*!%+-/<>';
     const count = Math.floor(60 * intensity);
     const particles: Particle[] = [];
 
@@ -56,7 +58,9 @@ export function EffectsCanvas({ effect, intensity = 0.5 }: EffectsCanvasProps) {
         vx: effect === 'embers' ? (Math.random() - 0.5) * 0.8 : (Math.random() - 0.5) * 0.4,
         vy:
           effect === 'rain'
-            ? 6 + Math.random() * 4
+            ? 7 + Math.random() * 4
+            : effect === 'matrix'
+            ? 3 + Math.random() * 5
             : effect === 'embers'
             ? -(1 + Math.random() * 2)
             : effect === 'snow'
@@ -70,24 +74,31 @@ export function EffectsCanvas({ effect, intensity = 0.5 }: EffectsCanvasProps) {
             : Math.random() * 3 + 1,
         alpha: Math.random() * 0.7 + 0.3,
         fadeSpeed: (Math.random() * 0.01 + 0.005) * (Math.random() > 0.5 ? 1 : -1),
+        char: matrixChars[Math.floor(Math.random() * matrixChars.length)],
       });
     }
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
+      // CRT Scanlines pass
+      if (crtScanlines || effect === 'crt_lines') {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        for (let y = 0; y < height; y += 4) {
+          ctx.fillRect(0, y, width, 1.5);
+        }
+      }
+
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
         p.x += p.vx;
         p.y += p.vy;
 
-        // Twinkle / pulse
         p.alpha += p.fadeSpeed;
         if (p.alpha <= 0.2 || p.alpha >= 0.9) {
           p.fadeSpeed = -p.fadeSpeed;
         }
 
-        // Screen wrap
         if (p.x < 0) p.x = width;
         if (p.x > width) p.x = 0;
         if (p.y < 0) p.y = height;
@@ -99,8 +110,12 @@ export function EffectsCanvas({ effect, intensity = 0.5 }: EffectsCanvasProps) {
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p.x, p.y + 8);
+          ctx.lineTo(p.x, p.y + 10);
           ctx.stroke();
+        } else if (effect === 'matrix') {
+          ctx.fillStyle = `rgba(78, 254, 89, ${p.alpha * 0.75})`;
+          ctx.font = '12px monospace';
+          ctx.fillText(p.char || '0', p.x, p.y);
         } else if (effect === 'embers') {
           ctx.fillStyle = `rgba(255, 120, 60, ${p.alpha})`;
           ctx.beginPath();
@@ -124,9 +139,9 @@ export function EffectsCanvas({ effect, intensity = 0.5 }: EffectsCanvasProps) {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [effect, intensity]);
+  }, [effect, intensity, crtScanlines]);
 
-  if (effect === 'none') return null;
+  if (effect === 'none' && !crtScanlines) return null;
 
   return (
     <canvas

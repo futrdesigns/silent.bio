@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { ProfileRecord, ProfileSettingsRecord, BadgeRecord } from '@/lib/types/profile';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Eye } from 'lucide-react';
+import { CheckCircle2, Eye, Crown, Flame, Sparkles } from 'lucide-react';
 
 interface IdentityHeaderProps {
   profile: ProfileRecord;
@@ -25,14 +25,89 @@ export function IdentityHeader({
     offline: 'bg-zinc-600',
   };
 
+  // Typewriter bio effect
+  const [displayedBio, setDisplayedBio] = React.useState(
+    settings.typewriterBio ? '' : profile.bio
+  );
+
+  React.useEffect(() => {
+    if (!settings.typewriterBio || !profile.bio) {
+      setDisplayedBio(profile.bio);
+      return;
+    }
+
+    let current = '';
+    let index = 0;
+    const interval = setInterval(() => {
+      if (index < profile.bio.length) {
+        current += profile.bio[index];
+        setDisplayedBio(current);
+        index++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 35);
+
+    return () => clearInterval(interval);
+  }, [profile.bio, settings.typewriterBio]);
+
+  // Avatar shape classes
+  const shapeClass =
+    settings.avatarShape === 'square'
+      ? 'rounded-none'
+      : settings.avatarShape === 'squircle'
+      ? 'rounded-2xl'
+      : settings.avatarShape === 'hexagon'
+      ? 'rounded-3xl rotate-45'
+      : 'rounded-full';
+
+  // Name effect styles
+  const getNameEffectClass = () => {
+    switch (settings.fontEffect) {
+      case 'glow':
+        return 'drop-shadow-[0_0_12px_var(--accent-glow)]';
+      case 'shimmer':
+        return 'bg-gradient-to-r from-foreground via-accent to-foreground bg-clip-text text-transparent animate-pulse';
+      case 'rainbow':
+        return 'bg-gradient-to-r from-red-400 via-emerald-400 to-indigo-400 bg-clip-text text-transparent';
+      case 'glitch':
+        return 'animate-bounce font-mono tracking-widest';
+      default:
+        return '';
+    }
+  };
+
+  const glowColor = settings.avatarGlowColor || settings.accentColor || '#A5A5FF';
+
   return (
     <div className="flex flex-col items-center text-center space-y-4">
-      {/* Avatar Container with Presence Status */}
+      {/* Avatar Container with Presence Status and Custom Decorations */}
       <div className="relative group">
+        {/* Crown Decoration */}
+        {settings.avatarDecoration === 'crown_gold' && (
+          <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20 text-amber-400 animate-bounce">
+            <Crown className="h-6 w-6 fill-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+          </div>
+        )}
+
+        {/* Fire Ring Decoration */}
+        {settings.avatarDecoration === 'fire_ring' && (
+          <div className="absolute -top-3 -right-2 z-20 text-orange-500 animate-pulse">
+            <Flame className="h-5 w-5 fill-orange-500 drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]" />
+          </div>
+        )}
+
+        {/* Decorative Ring Container */}
         <div
-          className="h-24 w-24 rounded-full overflow-hidden border border-white/10 bg-surface shadow-md transition-transform duration-200 group-hover:scale-105"
+          className={`h-24 w-24 overflow-hidden border border-white/10 bg-surface shadow-md transition-all duration-300 group-hover:scale-105 ${shapeClass} ${
+            settings.avatarDecoration === 'neon_pulse' ? 'ring-2 ring-accent ring-offset-2 ring-offset-background animate-pulse' : ''
+          }`}
           style={{
-            boxShadow: `0 0 24px ${settings.accentColor}20`,
+            boxShadow:
+              settings.avatarDecoration === 'glow_ring'
+                ? `0 0 24px 4px ${glowColor}`
+                : `0 0 20px ${glowColor}25`,
+            borderColor: settings.avatarDecoration === 'cyber_bracket' ? glowColor : undefined,
           }}
         >
           {profile.avatarUrl ? (
@@ -64,15 +139,18 @@ export function IdentityHeader({
       <div className="space-y-1.5">
         <div className="flex items-center justify-center gap-1.5 flex-wrap">
           <h1
-            className="text-2xl font-bold tracking-tight"
-            style={{ color: settings.textColor || '#F5F5F5' }}
+            className={`text-2xl font-bold tracking-tight transition-all ${getNameEffectClass()}`}
+            style={{
+              color: settings.textColor || '#F5F5F5',
+              ['--accent-glow' as any]: settings.accentColor,
+            }}
           >
             {profile.displayName}
           </h1>
 
           {profile.isVerified && (
             <CheckCircle2
-              className="h-5 w-5"
+              className="h-5 w-5 shrink-0"
               style={{ color: settings.accentColor || '#A5A5FF' }}
             />
           )}
@@ -80,8 +158,6 @@ export function IdentityHeader({
 
         <div className="flex items-center justify-center gap-2 text-xs font-mono text-muted">
           <span>@{profile.username}</span>
-          <span>•</span>
-          <span>UID #{profile.uidNumber}</span>
           {!profile.hideViewCounter && (
             <>
               <span>•</span>
@@ -100,15 +176,19 @@ export function IdentityHeader({
         )}
       </div>
 
-      {/* Bio */}
+      {/* Bio with typewriter support */}
       {profile.bio && (
         <p
-          className="max-w-md text-sm text-muted leading-relaxed"
+          className="max-w-md text-sm leading-relaxed"
           style={{
             fontFamily: settings.fontFamily,
+            color: settings.bioTextColor || '#92949D',
           }}
         >
-          {profile.bio}
+          {displayedBio}
+          {settings.typewriterBio && displayedBio.length < profile.bio.length && (
+            <span className="animate-pulse text-accent">|</span>
+          )}
         </p>
       )}
 
