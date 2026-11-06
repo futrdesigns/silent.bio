@@ -182,6 +182,24 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const badges = computeAutoBadges(username, uid);
 
     const { payload } = get();
+    const music =
+      payload.music.length > 0
+        ? payload.music
+        : [
+            {
+              id: `mus_${username}`,
+              profileId: `usr_${username}`,
+              sourceType: 'youtube' as const,
+              trackTitle: 'Midnight Ambient Drift',
+              artistName: 'Solaris',
+              sourceUrl: 'https://www.youtube.com/watch?v=jfKfPfyJRdk',
+              artworkUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80',
+              audioDuration: 180,
+              orderIndex: 0,
+              isAutoplay: false,
+            },
+          ];
+
     set({
       payload: {
         ...payload,
@@ -195,6 +213,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
           isAdmin: isUserAdmin,
         },
         badges,
+        music,
       },
       autosaveStatus: 'saved',
     });

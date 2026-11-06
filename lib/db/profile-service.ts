@@ -162,7 +162,20 @@ function initSeed() {
       },
     ],
     components: [],
-    music: [],
+    music: [
+      {
+        id: 'mus_s_1',
+        profileId: 'usr_admin_s',
+        sourceType: 'youtube',
+        trackTitle: 'Midnight Ambient Drift',
+        artistName: 'Solaris',
+        sourceUrl: 'https://www.youtube.com/watch?v=jfKfPfyJRdk',
+        artworkUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80',
+        audioDuration: 180,
+        orderIndex: 0,
+        isAutoplay: false,
+      },
+    ],
     badges: sBadges,
   });
   VIEW_COUNTS.set('s', 1);

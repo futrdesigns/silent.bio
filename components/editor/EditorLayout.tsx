@@ -171,30 +171,87 @@ export function EditorInspector() {
 
           <div className="space-y-1.5">
             <label className="text-xs font-mono text-muted">PROFILE ALIGNMENT</label>
-            <select
-              className="w-full h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
-              value={payload.settings.profileAlignment || 'center'}
-              onChange={(e) => updateSettings({ profileAlignment: e.target.value as any })}
-            >
-              <option value="center">Centered (Default)</option>
-              <option value="left">Left Aligned</option>
-              <option value="right">Right Aligned</option>
-            </select>
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                { id: 'left', label: 'Left' },
+                { id: 'center', label: 'Center' },
+                { id: 'right', label: 'Right' },
+              ].map((al) => (
+                <button
+                  key={al.id}
+                  type="button"
+                  onClick={() => updateSettings({ profileAlignment: al.id as any })}
+                  className={`py-1.5 text-xs font-mono rounded border transition-all ${
+                    (payload.settings.profileAlignment || 'center') === al.id
+                      ? 'border-accent bg-accent/20 text-foreground font-bold shadow-xs'
+                      : 'border-border bg-elevated/40 text-muted hover:border-border-strong hover:text-foreground'
+                  }`}
+                >
+                  {al.label}
+                </button>
+              ))}
+            </div>
           </div>
 
+          {/* Avatar URL + File Upload */}
           <div className="space-y-1.5">
-            <label className="text-xs font-mono text-muted">AVATAR URL (IMAGE OR ANIMATED GIF)</label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-mono text-muted">AVATAR (IMAGE OR GIF)</label>
+              <label className="text-[11px] font-mono text-accent hover:underline cursor-pointer">
+                <span>Upload File</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        if (typeof reader.result === 'string') {
+                          updateProfile({ avatarUrl: reader.result });
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+            </div>
             <Input
-              placeholder="https://.../avatar.gif"
+              placeholder="https://.../avatar.gif or upload"
               value={payload.profile.avatarUrl || ''}
               onChange={(e) => updateProfile({ avatarUrl: e.target.value })}
             />
           </div>
 
+          {/* Banner URL + File Upload */}
           <div className="space-y-1.5">
-            <label className="text-xs font-mono text-muted">BANNER URL (IMAGE, GIF, OR MP4)</label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-mono text-muted">BANNER (IMAGE, GIF, MP4)</label>
+              <label className="text-[11px] font-mono text-accent hover:underline cursor-pointer">
+                <span>Upload Banner</span>
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        if (typeof reader.result === 'string') {
+                          updateProfile({ bannerUrl: reader.result });
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+            </div>
             <Input
-              placeholder="https://.../banner.jpg"
+              placeholder="https://.../banner.jpg or upload"
               value={payload.profile.bannerUrl || ''}
               onChange={(e) => updateProfile({ bannerUrl: e.target.value })}
             />
@@ -310,53 +367,85 @@ export function EditorInspector() {
       {activeSection === 'appearance' && (
         <div className="space-y-4">
           <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider font-mono">
-            Appearance &amp; Glow
+            Card &amp; Typography
           </h2>
 
+          {/* Visual Card Architecture Selector */}
           <div className="space-y-1.5">
             <label className="text-xs font-mono text-muted">CARD ARCHITECTURE STYLE</label>
-            <select
-              className="w-full h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent font-mono"
-              value={payload.settings.cardStyle || 'glassmorphism'}
-              onChange={(e) => updateSettings({ cardStyle: e.target.value as any })}
-            >
-              <option value="glassmorphism">Glassmorphism (Frosted Glass &amp; Halo)</option>
-              <option value="elevated-dark">Elevated Obsidian (Default Dark)</option>
-              <option value="subtle-border">Subtle Border Minimal</option>
-              <option value="pure-flat">Pure Flat Minimalist</option>
-              <option value="neo-brutalist">Neo-Brutalist (Stark Contrast)</option>
-              <option value="cyber-grid">Cyber Grid (Phosphor Glow)</option>
-            </select>
+            <div className="grid grid-cols-2 gap-1.5">
+              {[
+                { id: 'glassmorphism', label: 'Frosted Glass' },
+                { id: 'elevated-dark', label: 'Elevated Dark' },
+                { id: 'neo-brutalist', label: 'Neo-Brutalist' },
+                { id: 'cyber-grid', label: 'Cyber Grid' },
+                { id: 'subtle-border', label: 'Subtle Minimal' },
+                { id: 'pure-flat', label: 'Pure Flat' },
+              ].map((cs) => (
+                <button
+                  key={cs.id}
+                  type="button"
+                  onClick={() => updateSettings({ cardStyle: cs.id as any })}
+                  className={`p-2 rounded border text-left text-[11px] font-mono transition-all ${
+                    (payload.settings.cardStyle || 'glassmorphism') === cs.id
+                      ? 'border-accent bg-accent/15 text-foreground font-bold shadow-xs'
+                      : 'border-border bg-elevated/40 text-muted hover:border-border-strong hover:text-foreground'
+                  }`}
+                >
+                  {cs.label}
+                </button>
+              ))}
+            </div>
           </div>
 
+          {/* Accent Color with Preset Swatches */}
           <div className="space-y-1.5">
             <label className="text-xs font-mono text-muted">ACCENT COLOR</label>
             <div className="flex items-center gap-2">
               <input
                 type="color"
-                className="h-8 w-8 rounded cursor-pointer border border-border bg-transparent"
+                className="h-8 w-8 rounded cursor-pointer border border-border bg-transparent shrink-0"
                 value={payload.settings.accentColor}
                 onChange={(e) => updateSettings({ accentColor: e.target.value })}
               />
               <Input
-                className="font-mono text-xs"
+                className="font-mono text-xs h-8"
                 value={payload.settings.accentColor}
                 onChange={(e) => updateSettings({ accentColor: e.target.value })}
               />
             </div>
+            {/* Quick Swatches */}
+            <div className="flex items-center gap-1.5 pt-1">
+              {[
+                { color: '#A5A5FF', label: 'Violet' },
+                { color: '#00F0FF', label: 'Cyan' },
+                { color: '#4EFE59', label: 'Matrix' },
+                { color: '#FF4D6D', label: 'Rose' },
+                { color: '#FBBF24', label: 'Gold' },
+                { color: '#F5F5F5', label: 'White' },
+              ].map((sw) => (
+                <button
+                  key={sw.color}
+                  type="button"
+                  onClick={() => updateSettings({ accentColor: sw.color })}
+                  className="h-5 w-5 rounded-full border border-white/20 hover:scale-110 transition-transform"
+                  style={{ backgroundColor: sw.color }}
+                  title={sw.label}
+                />
+              ))}
+            </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-mono text-muted">AVATAR DECORATION FRAME</label>
+            <label className="text-xs font-mono text-muted">AVATAR FRAME EFFECT</label>
             <select
               className="w-full h-8 rounded-md border border-border bg-surface px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
               value={payload.settings.avatarDecoration}
               onChange={(e) => updateSettings({ avatarDecoration: e.target.value as any })}
             >
-              <option value="none">None</option>
+              <option value="none">None (Clean Circle)</option>
               <option value="glow_ring">Aura Glow Ring</option>
               <option value="neon_pulse">Neon Pulse Ring</option>
-              <option value="crown_gold">VIP Gold Crown</option>
               <option value="fire_ring">Flame Flare</option>
               <option value="cyber_bracket">Cyber Brackets</option>
             </select>
@@ -620,7 +709,7 @@ export function EditorInspector() {
             Floating Music Player
           </h2>
           <p className="text-[11px] text-muted">
-            Displayed as a standalone audio capsule below your profile card.
+            Displayed as a standalone audio capsule below your profile card. Supports YouTube URLs, MP3 streams, and SoundCloud.
           </p>
 
           <div className="space-y-1.5">
@@ -640,18 +729,67 @@ export function EditorInspector() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-mono text-muted">AUDIO SOURCE URL (MP3 / STREAM)</label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-mono text-muted">AUDIO SOURCE (YOUTUBE URL OR MP3)</label>
+              <span className="text-[10px] text-accent font-mono">YOUTUBE READY</span>
+            </div>
             <Input
-              placeholder="https://.../song.mp3"
+              placeholder="https://www.youtube.com/watch?v=... or .mp3"
               value={activeTrack.sourceUrl}
               onChange={(e) => updateMusic({ sourceUrl: e.target.value })}
             />
           </div>
 
+          {/* Quick YouTube Sample Presets */}
+          <div className="space-y-1.5 pt-1">
+            <span className="text-[11px] font-mono text-muted">SAMPLE STREAMS (1-CLICK LOAD)</span>
+            <div className="grid grid-cols-2 gap-1.5">
+              {[
+                { title: 'Lofi Girl Live', artist: 'Lofi Records', url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk' },
+                { title: 'Synthwave Chill', artist: 'Astral Wave', url: 'https://www.youtube.com/watch?v=4xDzrJKXOOY' },
+                { title: 'Cyberpunk Night', artist: 'Night Drive', url: 'https://www.youtube.com/watch?v=1fueZCTYkpA' },
+                { title: 'Ambient Drift', artist: 'Solaris', url: 'https://assets.silent.bio/audio/demo.mp3' },
+              ].map((s) => (
+                <button
+                  key={s.title}
+                  type="button"
+                  onClick={() => updateMusic({ trackTitle: s.title, artistName: s.artist, sourceUrl: s.url })}
+                  className="px-2 py-1.5 rounded border border-white/10 bg-white/5 hover:border-accent hover:bg-white/10 text-left text-[11px] font-mono truncate"
+                >
+                  <span className="text-accent font-bold mr-1">▶</span>
+                  <span>{s.title}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Cover Artwork URL + File Upload */}
           <div className="space-y-1.5">
-            <label className="text-xs font-mono text-muted">COVER ARTWORK URL</label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-mono text-muted">COVER ARTWORK</label>
+              <label className="text-[11px] font-mono text-accent hover:underline cursor-pointer">
+                <span>Upload Cover</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        if (typeof reader.result === 'string') {
+                          updateMusic({ artworkUrl: reader.result });
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+            </div>
             <Input
-              placeholder="https://.../cover.jpg"
+              placeholder="https://.../cover.jpg or upload"
               value={activeTrack.artworkUrl || ''}
               onChange={(e) => updateMusic({ artworkUrl: e.target.value })}
             />
